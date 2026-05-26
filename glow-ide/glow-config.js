@@ -29,16 +29,16 @@ module.exports = {
   // Set enabled: false to disable update checks entirely.
   updates: {
     enabled: true,
-    owner: "Gmast2662",   // ← fill this in
-    repo: "Glow-Coding-Program",          // ← fill this in
-    checkIntervalMs: 1000 * 60 * 60,  // check every hour
+    owner: "Gmast2662",
+    repo: "Glow-Coding-Program",
+    checkIntervalMs: 1000 * 60 * 5,  // check every 5 mins
   },
 
   // ─── About ─────────────────────────────────────────────────────────────────
   about: {
     name: "Glow",
     tagline: "A simple, readable programming language.",
-    description: "Glow is designed for clarity and creativity. Write code that reads like plain English.",
+    description: "Glow is designed for clarity and creativity. Write code that is simple and like plain English.",
     website: "",   // optional — shown as a link in About
     github: "",   // optional
   },
