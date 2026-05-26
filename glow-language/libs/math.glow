@@ -1,0 +1,49 @@
+// ─────────────────────────────────────────
+// math.glow  —  a simple Glow math library
+//
+// Usage in your code:
+//   import "math"
+//
+// Then call any of the functions below.
+// ─────────────────────────────────────────
+
+func abs(n) {
+    if (n < 0) {
+        return n * -1
+    }
+    return n
+}
+
+func max(a, b) {
+    if (a > b) {
+        return a
+    }
+    return b
+}
+
+func min(a, b) {
+    if (a < b) {
+        return a
+    }
+    return b
+}
+
+func clamp(value, low, high) {
+    if (value < low) {
+        return low
+    }
+    if (value > high) {
+        return high
+    }
+    return value
+}
+
+func pow(base, exp) {
+    var result = 1
+    var i = 0
+    while (i < exp) {
+        result = result * base
+        i = i + 1
+    }
+    return result
+}

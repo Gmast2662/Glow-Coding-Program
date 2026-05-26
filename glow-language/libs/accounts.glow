@@ -1,0 +1,104 @@
+// ─────────────────────────────────────────────────────────────
+// accounts.glow  —  simple account system (login / signup)
+//
+// Usage:
+//   import "accounts"
+//
+//   addAccount("avi", "pass123", "avi@email.com")
+//   login("avi", "pass123")
+//   listAccounts()
+// ─────────────────────────────────────────────────────────────
+
+// accounts table: name -> { pass, email }
+var accounts = {}
+
+// ── Add a new account ──────────────────────────────────────
+func addAccount(name, pass, email) {
+    if (accounts.has(name)) {
+        print("Account already exists: " + name)
+        return false
+    }
+    var info = {
+        pass: pass,
+        email: email
+    }
+    accounts.set(name, info)
+    print("Account created: " + name)
+    return true
+}
+
+// ── Remove an account by name ──────────────────────────────
+func removeAccount(name) {
+    if (!accounts.has(name)) {
+        print("No account found: " + name)
+        return false
+    }
+    accounts.remove(name)
+    print("Account removed: " + name)
+    return true
+}
+
+// ── Login check ────────────────────────────────────────────
+func login(name, pass) {
+    if (!accounts.has(name)) {
+        print("Login failed: no account " + name)
+        return false
+    }
+    var info = accounts.get(name)
+    if (info.pass == pass) {
+        print("Logged in as: " + name)
+        return true
+    }
+    print("Login failed: wrong password")
+    return false
+}
+
+// ── Change password ────────────────────────────────────────
+func changePass(name, oldPass, newPass) {
+    if (!accounts.has(name)) {
+        print("No account found: " + name)
+        return false
+    }
+    var info = accounts.get(name)
+    if (info.pass != oldPass) {
+        print("Wrong password")
+        return false
+    }
+    info.pass = newPass
+    accounts.set(name, info)
+    print("Password changed for: " + name)
+    return true
+}
+
+// ── List all account names ─────────────────────────────────
+func listAccounts() {
+    var names = accounts.keys()
+    if (names.isEmpty()) {
+        print("No accounts.")
+        return names
+    }
+    print("Accounts:")
+    names.each(func printName(n) {
+        print("  - " + n)
+    })
+    return names
+}
+
+// ── Get account count ──────────────────────────────────────
+func accountCount() {
+    return accounts.length()
+}
+
+// ── Check if account exists ────────────────────────────────
+func accountExists(name) {
+    return accounts.has(name)
+}
+
+// ── Get account email ──────────────────────────────────────
+func getEmail(name) {
+    if (!accounts.has(name)) {
+        return ""
+    }
+    var info = accounts.get(name)
+    return info.email
+}

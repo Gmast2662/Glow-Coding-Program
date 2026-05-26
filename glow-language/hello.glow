@@ -1,0 +1,38 @@
+// hello.glow — example Glow program
+// Run with: npm run glow hello.glow
+
+import "math"
+
+// ── Variables ──────────────────────────
+var x = 10
+var name = "World"
+
+print("Hello, " + name + "!")
+print(x)
+
+// ── Using the math library ─────────────
+print(abs(-42))
+print(max(3, 7))
+print(pow(2, 8))
+print(clamp(150, 0, 100))
+
+// ── Functions ──────────────────────────
+func greet(who) {
+    return "Hey, " + who + "!"
+}
+
+print(greet("Glow"))
+
+// ── Arrays ─────────────────────────────
+var nums = [1, 2, 3]
+nums.add(4)
+print(nums)
+
+// ── Tables ─────────────────────────────
+var player = {
+    name: "Avi",
+    score: 0
+}
+
+player.score = 999
+print(player.name + " scored " + player.score)

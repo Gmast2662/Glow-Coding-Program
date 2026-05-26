@@ -1,0 +1,27 @@
+{
+  "language": {
+    "name": "Glow",
+    "version": "1.0.0",
+    "extension": ".glow"
+  },
+
+  "keywords": {
+    "var": "var",
+    "if": "if",
+    "else": "else",
+    "while": "while",
+    "repeat": "repeat",
+    "func": "func",
+    "return": "return",
+    "print": "print",
+    "true": "true",
+    "false": "false",
+    "and": "and",
+    "or": "or",
+    "import": "import"
+  },
+
+  "libs": {
+    "dir": "libs"
+  }
+}

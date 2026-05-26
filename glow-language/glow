@@ -1,0 +1,5 @@
+#!/bin/sh
+# glow — run a .glow file on Mac/Linux
+# Usage: ./glow myfile.glow
+DIR="$(cd "$(dirname "$0")" && pwd)"
+node "$DIR/dist/glow.js" "$@"

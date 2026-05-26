@@ -1,0 +1,83 @@
+{
+  "name": "glow-ide",
+  "version": "1.0.0",
+  "description": "The Glow Language IDE",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "publish": "node scripts/publish.js"
+  },
+  "build": {
+    "appId": "com.glow.ide",
+    "productName": "Glow",
+    "copyright": "Copyright © 2025 Glow Language",
+    "directories": {
+      "output": "dist-installer"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "glow-config.js",
+      "!node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../glow-language-new",
+        "to": "glow/",
+        "filter": [
+          "dist/**/*",
+          "libs/**/*",
+          "glow.config.json",
+          "package.json"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Glow",
+      "perMachine": false,
+      "runAfterFinish": true,
+      "include": "installer/installer.nsh",
+      "installerSidebar": "assets/installer-sidebar.bmp",
+      "installerHeader": "assets/installer-header.bmp"
+    },
+    "mac": {
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.2.0",
+    "electron-builder": "^26.8.1"
+  }
+}

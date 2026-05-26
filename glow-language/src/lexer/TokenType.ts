@@ -1,0 +1,54 @@
+export enum TokenType {
+  NUMBER,
+  STRING,
+  IDENTIFIER,
+
+  VAR,
+  IF,
+  ELSE,
+  WHILE,
+  REPEAT,
+  FUNC,
+  RETURN,
+  PRINT,
+  IMPORT,
+
+  TRUE,
+  FALSE,
+
+  AND,
+  OR,
+
+  PLUS,
+  MINUS,
+  STAR,
+  SLASH,
+
+  EQUAL,
+  EQUAL_EQUAL,
+
+  BANG,
+  BANG_EQUAL,
+
+  GREATER,
+  GREATER_EQUAL,
+
+  LESS,
+  LESS_EQUAL,
+
+  LPAREN,
+  RPAREN,
+
+  LBRACE,
+  RBRACE,
+
+  LBRACKET,
+  RBRACKET,
+
+  COMMA,
+  DOT,
+  COLON,
+
+  NEWLINE,
+  EOF
+}

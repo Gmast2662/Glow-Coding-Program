@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';" />
+  <title>Glow IDE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── TOP BAR ─────────────────────────────────────────────────────────── -->
+  <header id="topbar">
+    <div id="topbar-left">
+      <div id="logo">
+        <span class="logo-glow">✦</span>
+        <span class="logo-text">Glow</span>
+      </div>
+
+      <!-- Menu tabs -->
+      <nav id="menubar">
+        <div class="menu-item" id="menu-file">
+          <span>File</span>
+          <div class="dropdown" id="dropdown-file">
+            <button class="dd-item" data-action="new">
+              <span class="dd-icon">⊕</span> New File
+              <span class="dd-shortcut">Ctrl+N</span>
+            </button>
+            <button class="dd-item" data-action="open">
+              <span class="dd-icon">⊙</span> Open…
+              <span class="dd-shortcut">Ctrl+O</span>
+            </button>
+            <div class="dd-divider"></div>
+            <button class="dd-item" data-action="save">
+              <span class="dd-icon">⊘</span> Save
+              <span class="dd-shortcut">Ctrl+S</span>
+            </button>
+            <button class="dd-item" data-action="save-as">
+              <span class="dd-icon">⊛</span> Save As…
+              <span class="dd-shortcut">Ctrl+Shift+S</span>
+            </button>
+            <div class="dd-divider"></div>
+            <div class="dd-submenu">
+              <button class="dd-item" data-action="open-recent-menu">
+                <span class="dd-icon">></span> Open Recent
+              </button>
+              <div class="dropdown submenu-dropdown" id="recent-files-menu">
+                <div class="dd-empty">No recent files</div>
+              </div>
+            </div>
+            <div class="dd-divider"></div>
+            <button class="dd-item" data-action="close-file">
+              <span class="dd-icon">✕</span> Close File
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-item" id="menu-sketch">
+          <span>Sketch</span>
+          <div class="dropdown" id="dropdown-sketch">
+            <button class="dd-item" data-action="run">
+              <span class="dd-icon">▶</span> Run
+              <span class="dd-shortcut">F5</span>
+            </button>
+            <button class="dd-item" data-action="stop">
+              <span class="dd-icon">■</span> Stop
+              <span class="dd-shortcut">F6</span>
+            </button>
+            <div class="dd-divider"></div>
+            <button class="dd-item" data-action="clear-console">
+              <span class="dd-icon">⊖</span> Clear Console
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-item" id="menu-library">
+          <span>Library</span>
+          <div class="dropdown" id="dropdown-library">
+            <button class="dd-item" data-action="lib-browse">
+              <span class="dd-icon">◈</span> Browse Libraries
+            </button>
+            <button class="dd-item" data-action="lib-new">
+              <span class="dd-icon">⊕</span> Create New Library
+            </button>
+            <div class="dd-divider"></div>
+            <button class="dd-item" data-action="lib-submit">
+              <span class="dd-icon">⊛</span> Submit a Library…
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-item" id="menu-settings">
+          <span>Settings</span>
+          <div class="dropdown" id="dropdown-settings">
+            <button class="dd-item" data-action="settings">
+              <span class="dd-icon">*</span> IDE Settings
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-item" id="menu-help">
+          <span>Help</span>
+          <div class="dropdown" id="dropdown-help">
+            <button class="dd-item" data-action="help-docs">
+              <span class="dd-icon">◉</span> Language Reference
+            </button>
+            <button class="dd-item" data-action="help-examples">
+              <span class="dd-icon">◈</span> Load Example…
+            </button>
+            <div class="dd-divider"></div>
+            <button class="dd-item" data-action="help-about">
+              <span class="dd-icon">✦</span> About Glow
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <div id="topbar-center">
+      <div id="file-tab">
+        <span id="file-tab-icon">✦</span>
+        <span id="file-tab-name">untitled.glow</span>
+        <span id="file-tab-dirty" class="dirty-dot hidden">*</span>
+      </div>
+    </div>
+
+    <div id="topbar-right">
+      <button id="btn-run" class="action-btn run-btn" title="Run (F5)">
+        <span class="btn-icon">▶</span>
+        <span class="btn-label">Run</span>
+      </button>
+      <button id="btn-stop" class="action-btn stop-btn hidden" title="Stop (F6)">
+        <span class="btn-icon">■</span>
+        <span class="btn-label">Stop</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── MAIN AREA ────────────────────────────────────────────────────────── -->
+  <main id="workspace">
+    <!-- Editor pane -->
+    <div id="editor-pane">
+      <div id="editor-container">
+        <div id="line-numbers" aria-hidden="true"></div>
+        <div id="editor-scroll">
+          <pre id="editor-highlight" aria-hidden="true"></pre>
+          <textarea
+            id="editor"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            placeholder="// Start writing Glow code here…"
+          ></textarea>
+          <div id="autocomplete-box" class="hidden" role="listbox"></div>
+          <div id="diagnostics-panel" class="hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resize handle -->
+    <div id="resize-handle" title="Drag to resize"></div>
+
+    <!-- Console pane -->
+    <div id="console-pane">
+      <div id="console-header">
+        <div id="console-header-left">
+          <span id="console-icon">⊡</span>
+          <span id="console-title">Console</span>
+          <span id="console-status"></span>
+        </div>
+        <div id="console-header-right">
+          <button id="btn-clear-console" title="Clear console">⊖ Clear</button>
+        </div>
+      </div>
+      <div id="console-output" role="log" aria-live="polite"></div>
+      <div id="console-input-row" class="hidden">
+        <span id="console-input-prompt">▸</span>
+        <input id="console-input" type="text" placeholder="Type input and press Enter…" autocomplete="off" />
+      </div>
+    </div>
+  </main>
+
+  <!-- ── MODALS ─────────────────────────────────────────────────────────────── -->
+
+  <!-- Library Browser -->
+  <div id="modal-overlay" class="hidden">
+    <div id="modal-library" class="modal hidden">
+      <div class="modal-header">
+        <span class="modal-title">Library Manager</span>
+        <button class="modal-close" data-close="modal-library">x</button>
+      </div>
+      <div class="modal-body lib-body">
+        <div id="lib-list-pane">
+          <div class="lib-section-label">BUILT-IN</div>
+          <div class="lib-list" id="lib-list-builtin"></div>
+          <div class="lib-section-label">COMMUNITY</div>
+          <div class="lib-list" id="lib-list-community"></div>
+        </div>
+        <div id="lib-detail-pane">
+          <div id="lib-detail-placeholder">
+            <span>◈</span>
+            <p>Select a library to view details</p>
+          </div>
+          <div id="lib-detail-content" class="hidden">
+            <div id="lib-detail-name"></div>
+            <div id="lib-detail-badge"></div>
+            <div id="lib-detail-desc"></div>
+            <div class="lib-detail-section">Functions</div>
+            <div id="lib-detail-funcs"></div>
+            <button id="lib-detail-insert" class="action-btn run-btn">Insert import into editor</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Library -->
+    <div id="modal-submit" class="modal hidden">
+      <div class="modal-header">
+        <span class="modal-title">Submit a Library</span>
+        <button class="modal-close" data-close="modal-submit">x</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">Fill in the details below. Your library file should be in your project's <code>libs/</code> folder.</p>
+        <label>Library Name<input type="text" id="submit-name" placeholder="e.g. myutils" /></label>
+        <label>Display Name<input type="text" id="submit-display" placeholder="e.g. My Utilities" /></label>
+        <label>Description<textarea id="submit-desc" placeholder="What does this library do?"></textarea></label>
+        <label>Author<input type="text" id="submit-author" placeholder="Your name or handle" /></label>
+        <label>Version<input type="text" id="submit-version" placeholder="1.0.0" /></label>
+        <div id="submit-error" class="form-error hidden"></div>
+        <div class="modal-actions">
+          <button class="modal-close action-btn" data-close="modal-submit">Cancel</button>
+          <button id="btn-submit-lib" class="action-btn run-btn">Submit →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help: Language Reference -->
+    <div id="modal-docs" class="modal hidden">
+      <div class="modal-header">
+        <span class="modal-title">Language Reference</span>
+        <button class="modal-close" data-close="modal-docs">x</button>
+      </div>
+      <div class="modal-body docs-body">
+        <div id="docs-nav">
+          <button class="docs-nav-item active" data-section="basics">Basics</button>
+          <button class="docs-nav-item" data-section="control">Control Flow</button>
+          <button class="docs-nav-item" data-section="functions">Functions</button>
+          <button class="docs-nav-item" data-section="arrays">Arrays & Tables</button>
+          <button class="docs-nav-item" data-section="builtins">Built-ins</button>
+          <button class="docs-nav-item" data-section="fileio">File I/O</button>
+        </div>
+        <div id="docs-content"></div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div id="modal-settings" class="modal hidden">
+      <div class="modal-header">
+        <span class="modal-title">Settings</span>
+        <button class="modal-close" data-close="modal-settings">x</button>
+      </div>
+      <div class="modal-body settings-body">
+        <div class="settings-section">
+          <h3>Theme</h3>
+          <div class="theme-grid">
+            <button class="theme-choice" data-theme="dark">Dark</button>
+            <button class="theme-choice" data-theme="light">Light</button>
+            <button class="theme-choice" data-theme="midnight">Midnight</button>
+            <button class="theme-choice" data-theme="forest">Forest</button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>Editor</h3>
+          <label class="settings-toggle">
+            <span>Autocomplete suggestions</span>
+            <input type="checkbox" id="setting-autocomplete" />
+          </label>
+          <label class="settings-toggle">
+            <span>Auto-close quotes and brackets</span>
+            <input type="checkbox" id="setting-autoclose" />
+          </label>
+          <label class="settings-toggle">
+            <span>Realtime error checks</span>
+            <input type="checkbox" id="setting-diagnostics" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help: Load Example -->
+    <div id="modal-examples" class="modal hidden">
+      <div class="modal-header">
+        <span class="modal-title">Load Example</span>
+        <button class="modal-close" data-close="modal-examples">x</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">Choose an example to load into the editor. This will replace your current code.</p>
+        <div id="examples-list"></div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div id="modal-about" class="modal hidden">
+      <div class="modal-header">
+        <span class="modal-title">About Glow</span>
+        <button class="modal-close" data-close="modal-about">x</button>
+      </div>
+      <div class="modal-body about-body">
+        <div class="about-logo">✦</div>
+        <div class="about-name">Glow Language</div>
+        <div class="about-version">IDE v1.0.0</div>
+        <p class="about-desc">A simple, readable programming language built for clarity and creativity.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

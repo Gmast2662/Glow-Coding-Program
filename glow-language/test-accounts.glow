@@ -1,0 +1,20 @@
+import "accounts"
+
+addAccount("avi", "pass123", "avi@email.com")
+addAccount("bob", "hunter2", "bob@email.com")
+addAccount("avi", "pass123", "avi@email.com")
+
+listAccounts()
+
+login("avi", "wrongpass")
+login("avi", "pass123")
+
+changePass("avi", "pass123", "newpass!")
+login("avi", "newpass!")
+
+print(accountCount())
+print(accountExists("bob"))
+print(getEmail("bob"))
+
+removeAccount("bob")
+listAccounts()
