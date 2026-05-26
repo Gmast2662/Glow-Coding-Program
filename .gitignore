@@ -1,0 +1,12 @@
+# Dependencies
+glow-ide/node_modules/
+glow-language/node_modules/
+
+# Build outputs (don't push .exe files to git)
+glow-ide/dist-installer/
+glow-language/dist/
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
