@@ -2,7 +2,7 @@
   "name": "glow-ide",
   "version": "1.0.0",
   "description": "The Glow Language IDE",
-  "author": "Your Name",
+  "author": "Avi",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",

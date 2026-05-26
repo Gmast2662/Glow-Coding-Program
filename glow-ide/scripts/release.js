@@ -22,7 +22,7 @@ function getVersion() {
 }
 
 function updateConfigVersion(version) {
-    const configPath = path.join(__dirname, '..', '..', 'glow-config.js');
+    const configPath = path.join(__dirname, '..', 'glow-config.js');
     let config = fs.readFileSync(configPath, 'utf8');
     config = config.replace(/version:\s*["'][\d.]+["']/, `version: "${version}"`);
     fs.writeFileSync(configPath, config, 'utf8');
