@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -32,8 +34,11 @@ function updateConfigVersion(version) {
 async function createGitHubRelease(version) {
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
-        console.error('✗ GITHUB_TOKEN environment variable not set!');
-        console.error('  Set it with: set GITHUB_TOKEN=ghp_yourTokenHere');
+        console.error('✗ GITHUB_TOKEN not found!');
+        console.error('  Create a .env file in glow-ide/ with:');
+        console.error('    GITHUB_TOKEN=ghp_yourTokenHere');
+        console.error('  Or set it manually:');
+        console.error('    $env:GITHUB_TOKEN = "ghp_yourTokenHere"');
         process.exit(1);
     }
 

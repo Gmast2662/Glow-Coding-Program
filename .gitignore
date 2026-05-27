@@ -10,3 +10,6 @@ glow-language/dist/
 .DS_Store
 Thumbs.db
 *.log
+
+glow-ide/.env
+.env.env/local

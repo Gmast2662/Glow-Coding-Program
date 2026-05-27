@@ -1,5 +1,6 @@
 {
   "name": "glow-ide",
+  "repository": "https://github.com/Gmast2662/Glow-Coding-Program",
   "version": "1.0.0",
   "description": "The Glow Language IDE",
   "author": "Avi",
@@ -86,6 +87,7 @@
     }
   },
   "devDependencies": {
+    "dotenv": "^17.4.2",
     "electron": "^28.0.0",
     "electron-builder": "^24.0.0",
     "node-fetch": "^3.3.2"
