@@ -97,6 +97,7 @@ async function createGitHubRelease(version) {
         headers: {
             'Authorization': `token ${token}`,
             'Content-Type': 'application/octet-stream',
+            'Content-Length': installerData.length.toString(),
             'User-Agent': 'Glow-Release-Script'
         },
         body: installerData
