@@ -414,12 +414,13 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
 
     file.on('finish', () => {
       file.close();
-      console.log(`Download complete`);
 
       setTimeout(() => {
         try {
-          console.log(`Spawning installer: ${installerPath}`);
-          cp.spawn(installerPath, ['/S'], {
+          app.relaunch();
+
+          // Then run installer and close
+          cp.spawn(installerPath, ['/S', '/R'], {
             detached: true,
             stdio: 'ignore'
           });
@@ -428,10 +429,9 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
             isDestroying = true;
             mainWindow.destroy();
             app.quit();
-          }, 2000);
+          }, 1000);
         } catch (err) {
-          console.error('Spawn error:', err);
-          mainWindow?.webContents.send("run-error", "Failed to run installer: " + err.message);
+          console.error('Error:', err);
         }
       }, 500);
     });
