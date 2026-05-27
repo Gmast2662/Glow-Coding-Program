@@ -396,7 +396,6 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
 
     https.get(downloadUrl, (response) => {
       if (response.statusCode === 302 || response.statusCode === 301) {
-        // Follow redirect
         https.get(response.headers.location, (redirectRes) => {
           redirectRes.pipe(file);
         });
@@ -412,15 +411,21 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
       file.close();
       console.log(`Downloaded to: ${installerPath}`);
 
-      // Run installer silently
-      cp.spawn(installerPath, ['/S'], { detached: true });
-
-      // Close app
+      // Wait 500ms for file system to finish, then run installer
       setTimeout(() => {
-        isDestroying = true;
-        mainWindow.destroy();
-        app.quit();
-      }, 1000);
+        try {
+          cp.spawn(installerPath, ['/S'], { detached: true });
+
+          // Close app after installer starts
+          setTimeout(() => {
+            isDestroying = true;
+            mainWindow.destroy();
+            app.quit();
+          }, 1000);
+        } catch (err) {
+          mainWindow?.webContents.send("run-error", "Failed to run installer: " + err.message);
+        }
+      }, 500);
     });
   } catch (err) {
     mainWindow?.webContents.send("run-error", "Update failed: " + err.message);
