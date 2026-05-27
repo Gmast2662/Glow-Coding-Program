@@ -21,7 +21,7 @@ module.exports = {
   // MAJOR = breaking change / full reinstall needed
   // MINOR = new features, no reinstall (app notifies user to update)
   // PATCH = content-only change (libraries, examples, docs) — auto-applied silently
-  version: "1.20.0",
+  version: "1.21.0",
 
   // ─── Update Server ─────────────────────────────────────────────────────────
   // Point this at your GitHub repo. The updater checks:
@@ -73,6 +73,23 @@ module.exports = {
     //   desc:    "What it does.",
     //   funcs:   ["funcOne", "funcTwo"],
     // },
+  ],
+
+  library_template: [
+    `// ─────────────────────────────────────────
+    // mylib.glow — My Glow Library
+    //
+    // Usage in your code:
+    //   import "mylib" (or the name you give it)
+    // ─────────────────────────────────────────
+    // Click libraries tab: "Submit Library", to submit this code with a name for it and other info.
+    // We will review it and might accept it so after an update it shows in the 'Browse Libraries'.
+    
+    // Add your functions here:
+    
+    func myFunction(arg) {
+        return arg
+    }`
   ],
 
   // ─── Example Sketches ──────────────────────────────────────────────────────

@@ -414,30 +414,36 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
 
     file.on('finish', () => {
       file.close();
-      console.log(`Download complete, relaunching...`);
-      
+      console.log(`Download complete, running installer and shutting down...`);
+
+      // Give the file stream a tiny moment to fully release the file handle
       setTimeout(() => {
         try {
-          // Relaunch the app first
-          app.relaunch();
-          
-          // Then run installer in background
-          cp.spawn(installerPath, ['/S'], { 
+          const cp = require('child_process'); // Ensure this is required
+
+          // Spawn the installer completely detached from the Electron app
+          const child = cp.spawn(installerPath, ['/S'], {
             detached: true,
             stdio: 'ignore'
           });
-          
-          // Close this instance
-          setTimeout(() => {
-            isDestroying = true;
+
+          // unref() ensures the Node event loop doesn't wait for the installer to finish
+          child.unref();
+
+          // Immediately quit the current app so the installer can overwrite the files
+          isDestroying = true;
+          if (mainWindow && !mainWindow.isDestroyed()) {
             mainWindow.destroy();
-            app.quit();
-          }, 1000);
+          }
+          app.quit();
+
         } catch (err) {
           console.error('Spawn error:', err);
-          mainWindow?.webContents.send("run-error", "Failed to run installer: " + err.message);
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send("run-error", "Failed to run installer: " + err.message);
+          }
         }
-      }, 1000);
+      }, 500); // 500ms delay just to ensure the OS releases the file lock from writing
     });
 
     file.on('error', (err) => {

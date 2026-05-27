@@ -23,6 +23,7 @@ const state = {
     autoclose: true,
     diagnostics: true,
   },
+  libraryTemplate: "",
 };
 
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
@@ -78,6 +79,9 @@ window.addEventListener("DOMContentLoaded", async () => {
         LIBRARIES.length = 0;
         LIBRARIES.push(...info.config.libraries);
       }
+      if (info.config?.library_template && info.config.library_template.length) {
+        state.libraryTemplate = info.config.library_template[0].trim();
+      }
       if (info.config?.examples?.length) {
         EXAMPLES.length = 0;
         EXAMPLES.push(...info.config.examples);
@@ -128,6 +132,9 @@ window.addEventListener("DOMContentLoaded", async () => {
       if (newConfig?.libraries?.length) {
         LIBRARIES.length = 0;
         LIBRARIES.push(...newConfig.libraries);
+      }
+      if (newConfig?.library_template && newConfig.library_template.length) {
+        state.libraryTemplate = newConfig.library_template[0].trim();
       }
       if (newConfig?.examples?.length) {
         EXAMPLES.length = 0;
@@ -1136,7 +1143,8 @@ function selectLibrary(id) {
 }
 
 function newLibraryFile() {
-  const template = `// ─────────────────────────────────────────
+  // 1. Check the config state first, fallback to your hardcoded string if empty
+  const template = state.libraryTemplate || `// ─────────────────────────────────────────
 // mylib.glow — My Glow Library
 //
 // Usage in your code:
@@ -1149,6 +1157,7 @@ func myFunction(arg) {
     return arg
 }
 `;
+
   if (state.isDirty) {
     // Open in new state rather than overwriting
     confirmUnsaved().then(ok => {
@@ -1159,6 +1168,7 @@ func myFunction(arg) {
       setDirty(true);
       updateTabTitle();
       refreshEditorDecorations();
+      editor.focus();
     });
   } else {
     editor.value = template;
@@ -1167,6 +1177,7 @@ func myFunction(arg) {
     setDirty(true);
     updateTabTitle();
     refreshEditorDecorations();
+    editor.focus();
   }
 }
 
@@ -1224,7 +1235,7 @@ $("btn-submit-lib").addEventListener("click", async () => {
 
     if (response.ok) {
       conLine(`✓ Library submission sent: "${$("submit-display").value.trim()}"`, "con-success");
-      conLine("  (You'll receive an email. We'll review and add it to the community list!)", "con-info");
+      conLine("  (We'll review and add it to the community list!)", "con-info");
       showSubmitError("");
       closeAllModals();
 

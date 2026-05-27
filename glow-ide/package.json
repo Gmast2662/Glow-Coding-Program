@@ -1,7 +1,7 @@
 {
   "name": "glow-ide",
   "repository": "https://github.com/Gmast2662/Glow-Coding-Program",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "description": "The Glow Language IDE",
   "author": "Avi",
   "main": "src/main.js",
@@ -11,7 +11,8 @@
     "build": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
-    "release": "node scripts/release.js"
+    "release": "node scripts/release.js",
+    "approve": "node scripts/approve-library.js"
   },
   "build": {
     "appId": "com.glow.ide",
