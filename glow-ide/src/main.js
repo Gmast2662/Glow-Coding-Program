@@ -354,13 +354,12 @@ ipcMain.on("run-file", (_e, { glowJs, filePath }) => startGlowProcess(glowJs, fi
 
 ipcMain.on("stop-file", () => {
   if (glowProcess) {
-    glowProcess.kill("SIGTERM");
-    setTimeout(() => {
-      if (glowProcess && !glowProcess.killed) {
-        glowProcess.kill("SIGKILL");
-      }
-      glowProcess = null;
-    }, 500);
+    try {
+      process.kill(-glowProcess.pid);  // kill the whole process group
+    } catch (_) {
+      glowProcess.kill("SIGKILL");
+    }
+    glowProcess = null;
   }
 });
 ipcMain.on("send-input", (_e, text) => { if (glowProcess?.stdin) glowProcess.stdin.write(text); });
