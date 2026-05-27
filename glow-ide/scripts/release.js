@@ -87,8 +87,9 @@ async function createGitHubRelease(version) {
     const installerData = fs.readFileSync(installerPath);
     console.log(`✓ Read installer file (${(installerData.length / 1024 / 1024).toFixed(2)} MB)`);
 
+    console.log(`Release upload_url: ${release.upload_url}`);
     const uploadUrl = release.upload_url.split('{')[0] + `?name=Glow-${version}.exe`;
-    console.log(`Uploading to: ${uploadUrl.split('?')[0]}...`);
+    console.log(`Final upload URL: ${uploadUrl}`);
 
     // Use Node's https for large file uploads
     const https = require('https');
