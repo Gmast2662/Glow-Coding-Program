@@ -21,7 +21,7 @@ module.exports = {
   // MAJOR = breaking change / full reinstall needed
   // MINOR = new features, no reinstall (app notifies user to update)
   // PATCH = content-only change (libraries, examples, docs) — auto-applied silently
-  version: "1.9.0",
+  version: "1.10.0",
 
   // ─── Update Server ─────────────────────────────────────────────────────────
   // Point this at your GitHub repo. The updater checks:
