@@ -52,6 +52,10 @@ export class Interpreter {
   private importResolver?: ImportResolver;
   private timedOut = false;
 
+  stopExecution() {
+    this.timedOut = true;
+  }
+
   constructor() {
 
     // ─── RANDOM ───────────────────────────────────────────────────────────────
@@ -547,9 +551,8 @@ export class Interpreter {
       case "WhileStatement":
         let iterations = 0;
         while (this.evaluate(statement.condition, environment)) {
-          if (iterations++ > MAX_ITERATIONS) {
-            throw new Error("Infinite loop detected — exceeded 5,000 iterations");
-          }
+          if (this.timedOut) throw new Error("Execution stopped by user");
+          if (iterations++ > MAX_ITERATIONS) throw new Error("Infinite loop detected");
           const r = this.executeBlock(statement.body, new Environment(environment));
           if (r instanceof ReturnValue) return r;
         }
@@ -558,9 +561,8 @@ export class Interpreter {
       case "RepeatStatement":
         let repIterations = 0;
         for (let i = 0; i < this.evaluate(statement.count, environment); i++) {
-          if (repIterations++ > MAX_ITERATIONS) {
-            throw new Error("Infinite loop detected");
-          }
+          if (this.timedOut) throw new Error("Execution stopped by user");
+          if (repIterations++ > MAX_ITERATIONS) throw new Error("Infinite loop detected");
           const r = this.executeBlock(statement.body, new Environment(environment));
           if (r instanceof ReturnValue) return r;
         }

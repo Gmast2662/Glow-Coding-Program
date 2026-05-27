@@ -370,36 +370,54 @@ ipcMain.on("run-file", (_e, { glowJs, filePath }) => startGlowProcess(glowJs, fi
 
 ipcMain.on("stop-file", () => {
   if (glowProcess) {
-    glowProcess.stdin.write("\x03");  // Send Ctrl+C signal
-    setTimeout(() => {
-      if (glowProcess && !glowProcess.killed) {
-        glowProcess.kill("SIGKILL");
-      }
-      glowProcess = null;
-    }, 500);
+    glowProcess.kill("SIGKILL");
+    glowProcess = null;
   }
 });
 
 ipcMain.on("send-input", (_e, text) => { if (glowProcess?.stdin) glowProcess.stdin.write(text); });
 
-const { download } = require('electron-dl');
-
 ipcMain.on("download-update", async (_e, downloadUrl) => {
   try {
-    const dl = await download(mainWindow, downloadUrl, {
-      directory: app.getPath("downloads"),
-      filename: "Glow-Setup.exe"
+    const https = require('https');
+    const fs = require('fs');
+    const path = require('path');
+
+    const downloadsPath = app.getPath("downloads");
+    const installerPath = path.join(downloadsPath, "Glow-Setup.exe");
+
+    console.log(`Downloading update from: ${downloadUrl}`);
+
+    const file = fs.createWriteStream(installerPath);
+
+    https.get(downloadUrl, (response) => {
+      if (response.statusCode === 302 || response.statusCode === 301) {
+        // Follow redirect
+        https.get(response.headers.location, (redirectRes) => {
+          redirectRes.pipe(file);
+        });
+      } else {
+        response.pipe(file);
+      }
+    }).on('error', (err) => {
+      fs.unlink(installerPath, () => { });
+      mainWindow?.webContents.send("run-error", "Download failed: " + err.message);
     });
 
-    // Run installer silently
-    cp.spawn(dl.filePath, ['/S'], { detached: true });
+    file.on('finish', () => {
+      file.close();
+      console.log(`Downloaded to: ${installerPath}`);
 
-    // Close app
-    setTimeout(() => {
-      isDestroying = true;
-      mainWindow.destroy();
-      app.quit();
-    }, 1000);
+      // Run installer silently
+      cp.spawn(installerPath, ['/S'], { detached: true });
+
+      // Close app
+      setTimeout(() => {
+        isDestroying = true;
+        mainWindow.destroy();
+        app.quit();
+      }, 1000);
+    });
   } catch (err) {
     mainWindow?.webContents.send("run-error", "Update failed: " + err.message);
   }

@@ -73,10 +73,19 @@ window.addEventListener("DOMContentLoaded", async () => {
         versionEl.textContent = info.version;
       }
 
-      // Override static LIBRARIES/EXAMPLES/DOCS with config values if present
-      if (info.config?.libraries?.length) Object.assign(LIBRARIES, info.config.libraries);
-      if (info.config?.examples?.length) Object.assign(EXAMPLES, info.config.examples);
-      if (info.config?.docs?.length) Object.assign(DOCS_LIST, info.config.docs);
+      // Load from config
+      if (info.config?.libraries?.length) {
+        LIBRARIES.length = 0;
+        LIBRARIES.push(...info.config.libraries);
+      }
+      if (info.config?.examples?.length) {
+        EXAMPLES.length = 0;
+        EXAMPLES.push(...info.config.examples);
+      }
+      if (info.config?.docs?.length) {
+        DOCS_LIST.length = 0;
+        DOCS_LIST.push(...info.config.docs);
+      }
 
       // Load preferences from main
       if (info.prefs?.theme) applyTheme(info.prefs.theme);
@@ -116,9 +125,18 @@ window.addEventListener("DOMContentLoaded", async () => {
         if (result.preferences?.autoClosePairs !== undefined) state.settings.autoclose = result.preferences.autoClosePairs;
       });
 
-      if (newConfig?.libraries?.length) Object.assign(LIBRARIES, newConfig.libraries);
-      if (newConfig?.examples?.length) Object.assign(EXAMPLES, newConfig.examples);
-      if (newConfig?.docs?.length) Object.assign(DOCS_LIST, newConfig.docs);
+      if (newConfig?.libraries?.length) {
+        LIBRARIES.length = 0;
+        LIBRARIES.push(...newConfig.libraries);
+      }
+      if (newConfig?.examples?.length) {
+        EXAMPLES.length = 0;
+        EXAMPLES.push(...newConfig.examples);
+      }
+      if (newConfig?.docs?.length) {
+        DOCS_LIST.length = 0;
+        DOCS_LIST.push(...newConfig.docs);
+      }
       renderLibraryList();
       renderExamplesList();
       conLine("✦ Content updated automatically.", "con-success");
@@ -305,11 +323,9 @@ editor.addEventListener("keydown", e => {
       setDirty(true);
     }
   }
-  // Enter after { → auto-indent and format closing brace
   if (e.key === "Enter") {
     const pos = editor.selectionStart;
     const before = editor.value.substring(0, pos);
-    const after = editor.value.substring(pos);
     const lineStart = before.lastIndexOf("\n") + 1;
     const currentLine = before.substring(lineStart);
     const indent = currentLine.match(/^(\s*)/)[1];
@@ -318,24 +334,8 @@ editor.addEventListener("keydown", e => {
     if (lastChar === "{") {
       e.preventDefault();
       const extra = "    ";
-      const newIndent = indent + extra;
-      const closingIndent = indent;  // closing brace at same level as opening
-
-      // Check if next line starts with }
-      const nextLineStart = after.indexOf("\n") + 1;
-      const nextLine = after.substring(0, nextLineStart || after.length);
-
-      if (nextLine.trim().startsWith("}")) {
-        // Replace closing brace indent
-        const closingBracePos = after.indexOf("}");
-        const ins = "\n" + newIndent + "\n" + closingIndent;
-        editor.value = before + ins + after.substring(closingBracePos);
-      } else {
-        const ins = "\n" + newIndent;
-        editor.value = before + ins + after;
-      }
-
-      editor.selectionStart = editor.selectionEnd = pos + newIndent.length + 1;
+      editor.value = before + "\n" + indent + extra + editor.value.substring(pos);
+      editor.selectionStart = editor.selectionEnd = pos + indent.length + extra.length + 1;
       refreshEditorDecorations();
       setDirty(true);
     }
@@ -349,10 +349,6 @@ editor.addEventListener("scroll", () => {
   editorHighlight.scrollTop = editor.scrollTop;
   editorHighlight.scrollLeft = editor.scrollLeft;
   hideAutocomplete();
-});
-
-document.getElementById("format-btn").addEventListener("click", () => {
-  autoFormatCode();
 });
 
 // ─── Dirty / Tab Title ────────────────────────────────────────────────────────
@@ -934,6 +930,7 @@ function handleAction(action) {
     case "save": fileSave(); break;
     case "save-as": fileSaveAs(); break;
     case "close-file": fileClose(); break;
+    case "format": autoFormatCode(); break;
     // Sketch
     case "run": runSketch(); break;
     case "stop": stopSketch(); break;
@@ -1123,14 +1120,14 @@ function selectLibrary(id) {
   $("lib-detail-funcs").innerHTML = lib.funcs.map(f => `<span class="lib-func-chip">${f}()</span>`).join("");
 
   $("lib-detail-insert").onclick = () => {
-    const line = `import "${lib.name}"\n`;
+    const line = `import "${lib.file}"\n`;  // ← use .file instead of .name
     const pos = editor.selectionStart;
     editor.value = line + editor.value;
     editor.selectionStart = editor.selectionEnd = pos + line.length;
     setDirty(true);
     refreshEditorDecorations();
     closeAllModals();
-    conLine(`✓ Inserted: import "${lib.name}"`, "con-success");
+    conLine(`✓ Inserted: import "${lib.file}"`, "con-success");
     editor.focus();
   };
 }

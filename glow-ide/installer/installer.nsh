@@ -116,18 +116,31 @@ Function OptionsPageLeave
 FunctionEnd
 
 !macro customInstall
-  CreateDirectory "$SketchbookDir"
-  FileOpen $0 "$INSTDIR\glow-preferences.json" w
-  FileWrite $0 '{$\n'
-  FileWrite $0 '  "version": 1,$\n'
-  FileWrite $0 '  "sketchbookPath": "$SketchbookDir",$\n'
-  FileWrite $0 '  "recentFiles": [],$\n'
-  FileWrite $0 '  "theme": "dark",$\n'
-  FileWrite $0 '  "autocomplete": true,$\n'
-  FileWrite $0 '  "liveErrors": true,$\n'
-  FileWrite $0 '  "autoClosePairs": true$\n'
-  FileWrite $0 '}$\n'
-  FileClose $0
+  ; Create sketchbook folder ONLY if it doesn't exist
+  ${If} ${FileExists} "$SketchbookDir"
+    ; Folder already exists, don't recreate
+  ${Else}
+    CreateDirectory "$SketchbookDir"
+  ${EndIf}
+
+  ; Write glow-preferences.json ONLY if it doesn't exist
+  ${If} ${FileExists} "$INSTDIR\glow-preferences.json"
+    ; Preferences already exist, don't overwrite
+  ${Else}
+    FileOpen $0 "$INSTDIR\glow-preferences.json" w
+    FileWrite $0 '{$\n'
+    FileWrite $0 '  "version": 1,$\n'
+    FileWrite $0 '  "sketchbookPath": "$SketchbookDir",$\n'
+    FileWrite $0 '  "recentFiles": [],$\n'
+    FileWrite $0 '  "theme": "dark",$\n'
+    FileWrite $0 '  "autocomplete": true,$\n'
+    FileWrite $0 '  "liveErrors": true,$\n'
+    FileWrite $0 '  "autoClosePairs": true$\n'
+    FileWrite $0 '}$\n'
+    FileClose $0
+  ${EndIf}
+
+  ; Add to PATH if requested
   ${If} $AddToPath == "1"
     ReadRegStr $0 HKCU "Environment" "PATH"
     ${If} $0 == ""
@@ -137,9 +150,13 @@ FunctionEnd
     ${EndIf}
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   ${EndIf}
+
+  ; Desktop shortcut
   ${If} $AddDesktop == "1"
     CreateShortCut "$DESKTOP\Glow.lnk" "$INSTDIR\Glow.exe" "" "$INSTDIR\Glow.exe" 0
   ${EndIf}
+
+  ; Start Menu shortcut
   ${If} $AddStartMenu == "1"
     CreateDirectory "$SMPROGRAMS\Glow"
     CreateShortCut "$SMPROGRAMS\Glow\Glow IDE.lnk" "$INSTDIR\Glow.exe" "" "$INSTDIR\Glow.exe" 0
