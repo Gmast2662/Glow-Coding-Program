@@ -55,6 +55,10 @@ let diagnosticsTimer = null;
 let autocompleteTimer = null;
 let highlightFrame = null;
 
+const LIBRARIES = [];
+const EXAMPLES = [];
+const DOCS_LIST = [];
+
 // ─── Startup ──────────────────────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
   loadSettings();
@@ -79,8 +83,8 @@ window.addEventListener("DOMContentLoaded", async () => {
         LIBRARIES.length = 0;
         LIBRARIES.push(...info.config.libraries);
       }
-      if (info.config?.library_template && info.config.library_template.length) {
-        state.libraryTemplate = info.config.library_template[0].trim();
+      if (typeof info.config?.library_template === "string") {
+        state.libraryTemplate = info.config.library_template.trim();
       }
       if (info.config?.examples?.length) {
         EXAMPLES.length = 0;
@@ -133,8 +137,8 @@ window.addEventListener("DOMContentLoaded", async () => {
         LIBRARIES.length = 0;
         LIBRARIES.push(...newConfig.libraries);
       }
-      if (newConfig?.library_template && newConfig.library_template.length) {
-        state.libraryTemplate = newConfig.library_template[0].trim();
+      if (typeof newConfig?.library_template === "string") {
+        state.libraryTemplate = newConfig.library_template.trim();
       }
       if (newConfig?.examples?.length) {
         EXAMPLES.length = 0;
@@ -212,7 +216,7 @@ function showUpdateBanner(data) {
       const updating = document.createElement("div");
       updating.id = "updating-bar";
       updating.innerHTML = `
-          <span>⟳ Updating to v${data.latest}... Please wait, app will restart.</span>
+          <span>⟳ Updating to v${data.latest}... Please wait, before re opening the Glow app.</span>
         `;
       updating.style.cssText = `
           position:fixed; top:0; left:0; right:0; padding:12px; 
@@ -266,7 +270,6 @@ function autoFormatCode() {
 
 // LIBRARIES / EXAMPLES / DOCS_LIST are the mutable arrays used by render functions.
 // They start as the static values defined below and get overridden by glow-config.js.
-const DOCS_LIST = [];
 
 // ─── Editor: Line Numbers ─────────────────────────────────────────────────────
 function updateLineNumbers() {
@@ -1068,33 +1071,6 @@ document.querySelectorAll(".theme-choice").forEach(btn => {
   });
 });
 
-const LIBRARIES = [
-  {
-    id: "math",
-    name: "math",
-    display: "Math",
-    type: "builtin",
-    desc: "Extended math functions. Note: most math is already global — this library adds nothing new since all functions (clamp, abs, pow, etc.) are built-in globals.",
-    funcs: ["abs", "max", "min", "clamp", "pow"],
-  },
-  {
-    id: "accounts",
-    name: "accounts",
-    display: "Accounts",
-    type: "builtin",
-    desc: "A simple account management system for logins and signups. Stores accounts in memory during runtime.",
-    funcs: ["addAccount", "removeAccount", "login", "changePass", "listAccounts", "accountCount", "accountExists", "getEmail"],
-  },
-  {
-    id: "glowui-community",
-    name: "glowui",
-    display: "GlowUI",
-    type: "community",
-    desc: "A community library for building simple terminal UIs. Provides helpers for menus, tables, and prompts. (Example community library — not yet available.)",
-    funcs: ["menu", "table", "prompt", "confirm", "clear"],
-  },
-];
-
 function renderLibraryList() {
   const builtin = $("lib-list-builtin");
   const community = $("lib-list-community");
@@ -1143,20 +1119,7 @@ function selectLibrary(id) {
 }
 
 function newLibraryFile() {
-  // 1. Check the config state first, fallback to your hardcoded string if empty
-  const template = state.libraryTemplate || `// ─────────────────────────────────────────
-// mylib.glow — My Glow Library
-//
-// Usage in your code:
-//   import "mylib"
-// ─────────────────────────────────────────
-
-// Add your functions here:
-
-func myFunction(arg) {
-    return arg
-}
-`;
+  const template = state.libraryTemplate || "";
 
   if (state.isDirty) {
     // Open in new state rather than overwriting
@@ -1260,136 +1223,6 @@ function showSubmitError(message) {
   el.classList.toggle("hidden", !message);
 }
 
-// ─── Language Docs ────────────────────────────────────────────────────────────
-const DOCS = {
-  basics: `
-<h2>Basics</h2>
-<h3>Variables</h3>
-<p>Declare with <code>var</code>. No types needed — Glow figures it out.</p>
-<pre><span class="kw">var</span> name = <span class="str">"Alice"</span>
-<span class="kw">var</span> score = <span class="num">0</span>
-<span class="kw">var</span> active = <span class="kw">true</span></pre>
-<h3>Printing</h3>
-<pre><span class="kw">print</span>(<span class="str">"Hello, world!"</span>)
-<span class="kw">print</span>(score)
-<span class="kw">print</span>(<span class="str">"Score: "</span> + score)</pre>
-<h3>Comments</h3>
-<pre><span class="cmt">// This is a comment</span>
-<span class="kw">var</span> x = <span class="num">10</span>  <span class="cmt">// inline comment</span></pre>
-<h3>User Input</h3>
-<pre><span class="kw">var</span> name = input(<span class="str">"What is your name? "</span>)
-<span class="kw">print</span>(<span class="str">"Hello, "</span> + name)</pre>
-`,
-  control: `
-<h2>Control Flow</h2>
-<h3>If / Else</h3>
-<pre><span class="kw">if</span> (score > <span class="num">10</span>) {
-    <span class="kw">print</span>(<span class="str">"You win!"</span>)
-} <span class="kw">else if</span> (score > <span class="num">5</span>) {
-    <span class="kw">print</span>(<span class="str">"Getting there"</span>)
-} <span class="kw">else</span> {
-    <span class="kw">print</span>(<span class="str">"Keep trying"</span>)
-}</pre>
-<h3>While Loop</h3>
-<pre><span class="kw">var</span> i = <span class="num">0</span>
-<span class="kw">while</span> (i < <span class="num">5</span>) {
-    <span class="kw">print</span>(i)
-    i = i + <span class="num">1</span>
-}</pre>
-<h3>Repeat</h3>
-<pre><span class="kw">repeat</span> <span class="num">3</span> {
-    <span class="kw">print</span>(<span class="str">"hello"</span>)
-}</pre>
-`,
-  functions: `
-<h2>Functions</h2>
-<h3>Defining a Function</h3>
-<pre><span class="kw">func</span> greet(name) {
-    <span class="kw">return</span> <span class="str">"Hello, "</span> + name + <span class="str">"!"</span>
-}
-
-<span class="kw">print</span>(greet(<span class="str">"Alice"</span>))</pre>
-<h3>Multiple Parameters</h3>
-<pre><span class="kw">func</span> add(a, b) {
-    <span class="kw">return</span> a + b
-}
-
-<span class="kw">var</span> result = add(<span class="num">3</span>, <span class="num">4</span>)</pre>
-<h3>Functions as Values</h3>
-<pre><span class="kw">var</span> nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>]
-<span class="kw">var</span> doubled = nums.map(<span class="kw">func</span> double(x) {
-    <span class="kw">return</span> x * <span class="num">2</span>
-})</pre>
-`,
-  arrays: `
-<h2>Arrays & Tables</h2>
-<h3>Arrays</h3>
-<pre><span class="kw">var</span> nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]
-nums.add(<span class="num">4</span>)
-<span class="kw">print</span>(nums.length())
-<span class="kw">print</span>(nums.contains(<span class="num">2</span>))
-nums.removeAt(<span class="num">0</span>)</pre>
-<h3>Range</h3>
-<pre><span class="kw">print</span>(range(<span class="num">5</span>))          <span class="cmt">// [0,1,2,3,4]</span>
-<span class="kw">print</span>(range(<span class="num">2</span>, <span class="num">8</span>))       <span class="cmt">// [2,3,4,5,6,7]</span>
-<span class="kw">print</span>(range(<span class="num">0</span>, <span class="num">10</span>, <span class="num">2</span>))  <span class="cmt">// [0,2,4,6,8]</span></pre>
-<h3>Tables (like objects)</h3>
-<pre><span class="kw">var</span> player = {
-    name: <span class="str">"Alice"</span>,
-    score: <span class="num">0</span>
-}
-<span class="kw">print</span>(player.name)
-player.score = player.score + <span class="num">10</span></pre>
-`,
-  builtins: `
-<h2>Built-in Globals</h2>
-<h3>Math</h3>
-<pre>floor(<span class="num">4.9</span>)      <span class="cmt">// 4</span>
-ceil(<span class="num">4.1</span>)       <span class="cmt">// 5</span>
-round(<span class="num">4.5</span>)      <span class="cmt">// 5</span>
-abs(<span class="num">-7</span>)         <span class="cmt">// 7</span>
-sqrt(<span class="num">16</span>)        <span class="cmt">// 4</span>
-pow(<span class="num">2</span>, <span class="num">8</span>)       <span class="cmt">// 256</span>
-clamp(<span class="num">150</span>, <span class="num">0</span>, <span class="num">100</span>) <span class="cmt">// 100</span>
-max(<span class="num">1</span>, <span class="num">5</span>, <span class="num">3</span>)    <span class="cmt">// 5</span>
-min(<span class="num">1</span>, <span class="num">5</span>, <span class="num">3</span>)    <span class="cmt">// 1</span>
-random(<span class="num">1</span>, <span class="num">10</span>)   <span class="cmt">// random int 1–10</span></pre>
-<h3>Strings</h3>
-<pre>len(<span class="str">"hello"</span>)           <span class="cmt">// 5</span>
-upper(<span class="str">"hello"</span>)         <span class="cmt">// "HELLO"</span>
-lower(<span class="str">"HELLO"</span>)         <span class="cmt">// "hello"</span>
-trim(<span class="str">"  hi  "</span>)         <span class="cmt">// "hi"</span>
-replace(<span class="str">"hi"</span>, <span class="str">"h"</span>, <span class="str">"b"</span>) <span class="cmt">// "bi"</span>
-format(<span class="str">"Hi {}!"</span>, name)  <span class="cmt">// "Hi Alice!"</span>
-contains(<span class="str">"hello"</span>, <span class="str">"ell"</span>) <span class="cmt">// true</span></pre>
-<h3>Types</h3>
-<pre>typeOf(<span class="num">42</span>)    <span class="cmt">// "number"</span>
-isNumber(x)  <span class="cmt">// true/false</span>
-toNumber(<span class="str">"5"</span>) <span class="cmt">// 5</span>
-toStr(<span class="num">99</span>)    <span class="cmt">// "99"</span></pre>
-`,
-  fileio: `
-<h2>File I/O</h2>
-<h3>Reading & Writing</h3>
-<pre><span class="cmt">// Write a file (creates or overwrites)</span>
-writeFile(<span class="str">"data.txt"</span>, <span class="str">"hello\\n"</span>)
-
-<span class="cmt">// Append to a file</span>
-appendFile(<span class="str">"data.txt"</span>, <span class="str">"world\\n"</span>)
-
-<span class="cmt">// Read a file</span>
-<span class="kw">var</span> contents = readFile(<span class="str">"data.txt"</span>)
-<span class="kw">print</span>(contents)</pre>
-<h3>Checking & Deleting</h3>
-<pre><span class="kw">if</span> (fileExists(<span class="str">"data.txt"</span>)) {
-    deleteFile(<span class="str">"data.txt"</span>)
-    <span class="kw">print</span>(<span class="str">"Deleted."</span>)
-}</pre>
-<h3>Notes</h3>
-<p>File paths are relative to where you run the file from. Use <code>\\n</code> for newlines inside strings.</p>
-`,
-};
-
 document.querySelectorAll(".docs-nav-item").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".docs-nav-item").forEach(b => b.classList.remove("active"));
@@ -1399,142 +1232,11 @@ document.querySelectorAll(".docs-nav-item").forEach(btn => {
 });
 
 function renderDocsSection(section) {
-  // Try DOCS_LIST (from glow-config.js) first, then fall back to static DOCS object
-  const fromList = DOCS_LIST.find(d => d.id === section);
-  if (fromList) {
-    $("docs-content").innerHTML = fromList.html || "<p>No content.</p>";
-  } else {
-    $("docs-content").innerHTML = DOCS[section] || "<p>Section coming soon.</p>";
-  }
+  const doc = DOCS_LIST.find(d => d.id === section);
+
+  $("docs-content").innerHTML =
+    doc?.html || "<p>Section coming soon.</p>";
 }
-
-// ─── Examples ─────────────────────────────────────────────────────────────────
-const EXAMPLES = [
-  {
-    name: "Hello World",
-    desc: "The classic first program",
-    code: `// Hello World
-var name = input("What is your name? ")
-print("Hello, " + name + "!")
-`,
-  },
-  {
-    name: "Counter",
-    desc: "A simple while loop counter",
-    code: `// Counter
-var i = 1
-while (i <= 10) {
-    print(i)
-    i = i + 1
-}
-print("Done!")
-`,
-  },
-  {
-    name: "Guessing Game",
-    desc: "Pick a number and guess it",
-    code: `// Number Guessing Game
-var secret = random(1, 100)
-var guesses = 0
-var won = false
-
-print("I'm thinking of a number between 1 and 100.")
-
-while (!won) {
-    var guess = toNumber(input("Your guess: "))
-    guesses = guesses + 1
-
-    if (guess < secret) {
-        print("Too low!")
-    } else if (guess > secret) {
-        print("Too high!")
-    } else {
-        won = true
-        print("Correct! You got it in " + guesses + " guesses.")
-    }
-}
-`,
-  },
-  {
-    name: "FizzBuzz",
-    desc: "The classic programming test",
-    code: `// FizzBuzz
-var i = 1
-while (i <= 30) {
-    if (i / 3 == floor(i / 3) and i / 5 == floor(i / 5)) {
-        print("FizzBuzz")
-    } else if (i / 3 == floor(i / 3)) {
-        print("Fizz")
-    } else if (i / 5 == floor(i / 5)) {
-        print("Buzz")
-    } else {
-        print(i)
-    }
-    i = i + 1
-}
-`,
-  },
-  {
-    name: "Simple Calculator",
-    desc: "Add, subtract, multiply, divide",
-    code: `// Simple Calculator
-var a = toNumber(input("First number: "))
-var op = input("Operator (+, -, *, /): ")
-var b = toNumber(input("Second number: "))
-var result = 0
-
-if (op == "+") {
-    result = a + b
-} else if (op == "-") {
-    result = a - b
-} else if (op == "*") {
-    result = a * b
-} else if (op == "/") {
-    if (b == 0) {
-        print("Error: cannot divide by zero")
-        exit(1)
-    }
-    result = a / b
-} else {
-    print("Unknown operator: " + op)
-    exit(1)
-}
-
-print(a + " " + op + " " + b + " = " + result)
-`,
-  },
-  {
-    name: "File Notes",
-    desc: "Save and load notes from a file",
-    code: `// File Notes
-var file = "notes.txt"
-
-func showNotes() {
-    if (fileExists(file)) {
-        print("─── Your notes ───")
-        print(readFile(file))
-    } else {
-        print("No notes yet.")
-    }
-}
-
-var cmd = input("(r)ead / (w)rite / (c)lear: ")
-
-if (cmd == "r") {
-    showNotes()
-} else if (cmd == "w") {
-    var note = input("Note: ")
-    appendFile(file, note + "\\n")
-    print("Saved!")
-} else if (cmd == "c") {
-    writeFile(file, "")
-    print("Notes cleared.")
-} else {
-    print("Unknown command.")
-}
-`,
-  },
-];
 
 function renderExamplesList() {
   const list = $("examples-list");
