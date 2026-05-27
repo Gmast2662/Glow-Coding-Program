@@ -414,21 +414,25 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
 
     file.on('finish', () => {
       file.close();
-      console.log(`Download complete, launching installer...`);
-
+      console.log(`Download complete, relaunching...`);
+      
       setTimeout(() => {
         try {
-          cp.spawn(installerPath, ['/S', '/R'], {
+          // Relaunch the app first
+          app.relaunch();
+          
+          // Then run installer in background
+          cp.spawn(installerPath, ['/S'], { 
             detached: true,
             stdio: 'ignore'
           });
-
-          // Close app after a short delay to let installer start
+          
+          // Close this instance
           setTimeout(() => {
             isDestroying = true;
             mainWindow.destroy();
             app.quit();
-          }, 2000);
+          }, 1000);
         } catch (err) {
           console.error('Spawn error:', err);
           mainWindow?.webContents.send("run-error", "Failed to run installer: " + err.message);

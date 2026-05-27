@@ -158,8 +158,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 // ─── Update Notification ──────────────────────────────────────────────────────
 function showUpdateNotification(data) {
-  console.log("Update notification data:", data);  // ← add this
-  console.log("Download URL:", data.downloadUrl);   // ← add this
   // Show a banner in the console
   conLine("", "con-divider");
   if (data.type === "patch") {
