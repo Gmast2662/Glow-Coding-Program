@@ -95,6 +95,26 @@ async function createGitHubRelease(version) {
     const https = require('https');
     const urlParse = require('url');
 
+    const uploadRes = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/octet-stream',
+            'User-Agent': 'Glow-Release-Script'
+        },
+        body: installerData
+    });
+
+    console.log(`Upload response status: ${uploadRes.status}`);
+    if (!uploadRes.ok) {
+        const error = await uploadRes.text();
+        console.error('✗ Failed to upload installer:', error);
+        reject(new Error(`Upload failed: ${uploadRes.status}`));
+    } else {
+        console.log(`✓ Uploaded installer!`);
+        return release.html_url;
+    }
+
     return new Promise((resolve, reject) => {
         const uploadOptions = urlParse.parse(uploadUrl);
         uploadOptions.method = 'POST';
