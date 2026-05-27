@@ -161,7 +161,9 @@ function showUpdateNotification(data) {
   // Show a banner in the console
   conLine("", "con-divider");
   if (data.type === "patch") {
-    conLine("✦ Content updated to v" + data.latest + ". New examples and libraries are available.", "con-success");
+    // conLine("✦ Content updated to v" + data.latest + ". New examples and libraries are available.", "con-success");
+    conLine("✦ Content updated to v" + data.latest + ". Close and reopen the app to see new changes or libraries.", "con-success");
+    showUpdateBanner(data);
   } else if (data.type === "minor") {
     conLine("↑ Glow v" + data.latest + " is available (you have v" + data.current + ").", "con-info");
     conLine("  Download the new version from the Help menu.", "con-info");
