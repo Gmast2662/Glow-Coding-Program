@@ -141,7 +141,14 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, "renderer", "index.html"));
-  mainWindow.webContents.openDevTools();
+
+  mainWindow.webContents.on("before-input-event", (event, input) => {
+    if ((input.control || input.meta) && input.shift && input.key.toLowerCase() === "i") {
+      mainWindow.webContents.toggleDevTools();
+      event.preventDefault();
+    }
+  });
+
   mainWindow.once("ready-to-show", () => mainWindow.show());
 
   mainWindow.on("close", e => {
