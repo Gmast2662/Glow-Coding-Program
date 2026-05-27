@@ -77,10 +77,6 @@ async function createGitHubRelease(version) {
     const installerName = `Glow Setup ${version}.exe`;
     const installerPath = path.join(__dirname, '..', 'dist-installer', installerName);
 
-    console.log(`\n➤ Uploading ${installerName}...`);
-    console.log(`✓ Read installer file (${installerData.length} bytes)`);
-    console.log(`Uploading to: ${uploadUrl}`);
-
     if (!fs.existsSync(installerPath)) {
         console.error(`✗ Installer not found: ${installerPath}`);
         console.error('  Run npm run build first!');
@@ -100,6 +96,10 @@ async function createGitHubRelease(version) {
         },
         body: installerData
     });
+
+    console.log(`\n➤ Uploading ${installerName}...`);
+    console.log(`✓ Read installer file (${installerData.length} bytes)`);
+    console.log(`Uploading to: ${uploadUrl}`);
 
     console.log(`Upload response status: ${uploadRes.status}`);
     if (!uploadRes.ok) {
