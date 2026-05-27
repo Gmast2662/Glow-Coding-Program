@@ -1188,35 +1188,21 @@ $("btn-submit-lib").addEventListener("click", async () => {
     return;
   }
 
-  // 2. Validate File Content
-  const fileInput = $("submit-file"); // Ensure this matches your file input's ID
-  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-    showSubmitError("Please upload a library file.");
+  // 2. Validate Editor Content (The "File")
+  // Instead of looking for an uploaded file, we pull directly from the active editor
+  const fileContent = editor.value;
+
+  if (!fileContent || !fileContent.trim()) {
+    showSubmitError("The editor is empty. Please write your library code before submitting.");
     return;
   }
 
-  const file = fileInput.files[0];
-  let fileContent = "";
-
-  try {
-    // Read the file contents as text
-    fileContent = await file.text();
-  } catch (err) {
-    showSubmitError("Could not read the file. Please try again.");
-    return;
-  }
-
-  if (!fileContent.trim()) {
-    showSubmitError("The submitted file is empty.");
-    return;
-  }
-
-  // Check if the file contains functions, classes, or arrow functions
-  // You can also add a specific keyword from your template, e.g., fileContent.includes("MyLibraryTemplate")
-  const looksLikeCode = /function\s+\w+|\w+\s*=\s*function|\w+\s*=>|class\s+\w+/.test(fileContent);
+  // Check if the code contains your Glow syntax (e.g., "func myFunction")
+  // We look for the word "func" followed by a space and a word character
+  const looksLikeCode = /func\s+\w+/.test(fileContent);
 
   if (!looksLikeCode) {
-    showSubmitError("The file doesn't look like a valid library. It must contain functions or code.");
+    showSubmitError("This doesn't look like a valid Glow library. Make sure it contains at least one 'func'.");
     return;
   }
 
@@ -1231,8 +1217,8 @@ $("btn-submit-lib").addEventListener("click", async () => {
         description: $("submit-desc").value.trim(),
         author: $("submit-author").value.trim(),
         version: $("submit-version").value.trim(),
-        // Optional: Send the actual file content to Formspree so you can review the code
-        // file_content: fileContent 
+        // IMPORTANT: We are now sending the actual code to Formspree!
+        library_code: fileContent
       })
     });
 
@@ -1242,13 +1228,12 @@ $("btn-submit-lib").addEventListener("click", async () => {
       showSubmitError("");
       closeAllModals();
 
-      // Clear form
+      // Clear form text fields
       $("submit-name").value = "";
       $("submit-display").value = "";
       $("submit-desc").value = "";
       $("submit-author").value = "";
       $("submit-version").value = "";
-      if (fileInput) fileInput.value = ""; // Clear the file input
     } else {
       showSubmitError("Failed to submit. Please try again.");
     }
