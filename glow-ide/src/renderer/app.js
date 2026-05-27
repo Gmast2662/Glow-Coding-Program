@@ -1171,6 +1171,7 @@ func myFunction(arg) {
 }
 
 $("btn-submit-lib").addEventListener("click", async () => {
+  // 1. Validate Text Fields
   const fields = ["submit-name", "submit-display", "submit-desc", "submit-author", "submit-version"];
   for (const id of fields) {
     if (!$(id).value.trim()) {
@@ -1179,6 +1180,7 @@ $("btn-submit-lib").addEventListener("click", async () => {
       return;
     }
   }
+
   const descWords = $("submit-desc").value.trim().split(/\s+/).filter(Boolean).length;
   if (descWords < 8) {
     $("submit-desc").focus();
@@ -1186,7 +1188,39 @@ $("btn-submit-lib").addEventListener("click", async () => {
     return;
   }
 
-  // Send to Formspree
+  // 2. Validate File Content
+  const fileInput = $("submit-file"); // Ensure this matches your file input's ID
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    showSubmitError("Please upload a library file.");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  let fileContent = "";
+
+  try {
+    // Read the file contents as text
+    fileContent = await file.text();
+  } catch (err) {
+    showSubmitError("Could not read the file. Please try again.");
+    return;
+  }
+
+  if (!fileContent.trim()) {
+    showSubmitError("The submitted file is empty.");
+    return;
+  }
+
+  // Check if the file contains functions, classes, or arrow functions
+  // You can also add a specific keyword from your template, e.g., fileContent.includes("MyLibraryTemplate")
+  const looksLikeCode = /function\s+\w+|\w+\s*=\s*function|\w+\s*=>|class\s+\w+/.test(fileContent);
+
+  if (!looksLikeCode) {
+    showSubmitError("The file doesn't look like a valid library. It must contain functions or code.");
+    return;
+  }
+
+  // 3. Send to Formspree
   try {
     const response = await fetch("https://formspree.io/f/meedvarq", {
       method: "POST",
@@ -1197,6 +1231,8 @@ $("btn-submit-lib").addEventListener("click", async () => {
         description: $("submit-desc").value.trim(),
         author: $("submit-author").value.trim(),
         version: $("submit-version").value.trim(),
+        // Optional: Send the actual file content to Formspree so you can review the code
+        // file_content: fileContent 
       })
     });
 
@@ -1205,12 +1241,14 @@ $("btn-submit-lib").addEventListener("click", async () => {
       conLine("  (You'll receive an email. We'll review and add it to the community list!)", "con-info");
       showSubmitError("");
       closeAllModals();
+
       // Clear form
       $("submit-name").value = "";
       $("submit-display").value = "";
       $("submit-desc").value = "";
       $("submit-author").value = "";
       $("submit-version").value = "";
+      if (fileInput) fileInput.value = ""; // Clear the file input
     } else {
       showSubmitError("Failed to submit. Please try again.");
     }
