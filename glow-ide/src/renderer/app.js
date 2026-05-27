@@ -215,6 +215,7 @@ function showUpdateBanner(data) {
       document.body.appendChild(updating);
 
       // Tell main process to download and apply update
+      console.log("Sending download request:", data.downloadUrl);
       window.glowAPI.downloadAndApplyUpdate(data.downloadUrl);
     });
   });

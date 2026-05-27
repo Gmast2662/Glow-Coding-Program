@@ -32,6 +32,8 @@ let prefs = null;
 let prefsPath = null;
 let sketchbookPath = null;
 
+// hi
+
 // ─── Paths ────────────────────────────────────────────────────────────────────
 function getGlowRoot() {
   // In a packaged app:  resources/app/  →  go up to find install root
