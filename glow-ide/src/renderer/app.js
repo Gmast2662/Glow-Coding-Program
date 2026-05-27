@@ -1170,7 +1170,7 @@ func myFunction(arg) {
   }
 }
 
-$("btn-submit-lib").addEventListener("click", () => {
+$("btn-submit-lib").addEventListener("click", async () => {
   const fields = ["submit-name", "submit-display", "submit-desc", "submit-author", "submit-version"];
   for (const id of fields) {
     if (!$(id).value.trim()) {
@@ -1185,15 +1185,38 @@ $("btn-submit-lib").addEventListener("click", () => {
     showSubmitError("Please write a longer description, at least 8 words.");
     return;
   }
-  showSubmitError("");
-  conLine(`Library submission recorded: "${$("submit-display").value.trim()}" by ${$("submit-author").value.trim()}`, "con-info");
-  conLine("  (Submissions will be reviewed and added to the community list in a future update.)", "con-info");
-  closeAllModals();
-  $("submit-name").value = "";
-  $("submit-display").value = "";
-  $("submit-desc").value = "";
-  $("submit-author").value = "";
-  $("submit-version").value = "";
+
+  // Send to Formspree
+  try {
+    const response = await fetch("https://formspree.io/f/meedvarq", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: $("submit-name").value.trim(),
+        display: $("submit-display").value.trim(),
+        description: $("submit-desc").value.trim(),
+        author: $("submit-author").value.trim(),
+        version: $("submit-version").value.trim(),
+      })
+    });
+
+    if (response.ok) {
+      conLine(`✓ Library submission sent: "${$("submit-display").value.trim()}"`, "con-success");
+      conLine("  (You'll receive an email. We'll review and add it to the community list!)", "con-info");
+      showSubmitError("");
+      closeAllModals();
+      // Clear form
+      $("submit-name").value = "";
+      $("submit-display").value = "";
+      $("submit-desc").value = "";
+      $("submit-author").value = "";
+      $("submit-version").value = "";
+    } else {
+      showSubmitError("Failed to submit. Please try again.");
+    }
+  } catch (err) {
+    showSubmitError("Submission error: " + err.message);
+  }
 });
 
 function showSubmitError(message) {
