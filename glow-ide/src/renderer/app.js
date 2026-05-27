@@ -1430,11 +1430,11 @@ function loadExample(ex) {
   });
 }
 
-ipcRenderer.on("app-config-updated", (event, newConfig) => {
+window._onConfigUpdated = (newConfig) => {
   if (newConfig?.libraries?.length) Object.assign(LIBRARIES, newConfig.libraries);
   if (newConfig?.examples?.length) Object.assign(EXAMPLES, newConfig.examples);
   if (newConfig?.docs?.length) Object.assign(DOCS_LIST, newConfig.docs);
   renderLibraryList();
   renderExamplesList();
   conLine("✦ Content updated automatically.", "con-success");
-});
+};

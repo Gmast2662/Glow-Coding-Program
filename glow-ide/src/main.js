@@ -350,7 +350,17 @@ ipcMain.on("run-source", (_e, { glowJs, source, fileName }) => {
 // Run from a saved file path
 ipcMain.on("run-file", (_e, { glowJs, filePath }) => startGlowProcess(glowJs, filePath));
 
-ipcMain.on("stop-file", () => { if (glowProcess) { glowProcess.kill(); glowProcess = null; } });
+ipcMain.on("stop-file", () => {
+  if (glowProcess) {
+    glowProcess.kill("SIGTERM");
+    setTimeout(() => {
+      if (glowProcess && !glowProcess.killed) {
+        glowProcess.kill("SIGKILL");
+      }
+      glowProcess = null;
+    }, 500);
+  }
+});
 ipcMain.on("send-input", (_e, text) => { if (glowProcess?.stdin) glowProcess.stdin.write(text); });
 
 // ─── IPC: Update actions ──────────────────────────────────────────────────────
