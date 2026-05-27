@@ -382,6 +382,29 @@ ipcMain.on("stop-file", () => {
 
 ipcMain.on("send-input", (_e, text) => { if (glowProcess?.stdin) glowProcess.stdin.write(text); });
 
+const { download } = require('electron-dl');
+
+ipcMain.on("download-update", async (_e, downloadUrl) => {
+  try {
+    const dl = await download(mainWindow, downloadUrl, {
+      directory: app.getPath("downloads"),
+      filename: "Glow-Setup.exe"
+    });
+
+    // Run installer silently
+    cp.spawn(dl.filePath, ['/S'], { detached: true });
+
+    // Close app
+    setTimeout(() => {
+      isDestroying = true;
+      mainWindow.destroy();
+      app.quit();
+    }, 1000);
+  } catch (err) {
+    mainWindow?.webContents.send("run-error", "Update failed: " + err.message);
+  }
+});
+
 // ─── IPC: Update actions ──────────────────────────────────────────────────────
 ipcMain.on("open-download-url", (_e, url) => shell.openExternal(url));
 ipcMain.on("open-external", (_e, url) => shell.openExternal(url));

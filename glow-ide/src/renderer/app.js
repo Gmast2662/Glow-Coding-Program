@@ -178,8 +178,27 @@ function showUpdateBanner(data) {
     "background:none;border:none;color:var(--text-2);cursor:pointer;font-size:14px;margin-left:auto;";
 
   banner.querySelector("#update-btn-download").addEventListener("click", () => {
-    if (data.downloadUrl) window.glowAPI.openDownloadUrl(data.downloadUrl);
+    confirmUnsaved().then(ok => {
+      if (!ok) return;
+
+      // Show updating bar
+      const updating = document.createElement("div");
+      updating.id = "updating-bar";
+      updating.innerHTML = `
+          <span>⟳ Updating to v${data.latest}... Please wait, app will restart.</span>
+        `;
+      updating.style.cssText = `
+          position:fixed; top:0; left:0; right:0; padding:12px; 
+          background:var(--accent); color:#fff; text-align:center; 
+          font-size:13px; z-index:10000;
+        `;
+      document.body.appendChild(updating);
+
+      // Tell main process to download and apply update
+      window.glowAPI.downloadAndApplyUpdate(data.downloadUrl);
+    });
   });
+
   banner.querySelector("#update-btn-dismiss").addEventListener("click", () => banner.remove());
 
   const editorPane = document.getElementById("editor-pane");

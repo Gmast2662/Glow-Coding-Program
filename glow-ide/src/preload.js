@@ -42,6 +42,8 @@ contextBridge.exposeInMainWorld("glowAPI", {
 
   // Misc
   openExternal: (url) => ipcRenderer.send("open-external", url),
+
+  downloadAndApplyUpdate: (downloadUrl) => ipcRenderer.send("download-update", downloadUrl),
 });
 
 ipcRenderer.on("app-config-updated", (event, newConfig) => {
