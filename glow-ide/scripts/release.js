@@ -44,10 +44,8 @@ async function createGitHubRelease(version) {
 
     console.log(`\n➤ Creating GitHub release v${version}...`);
 
-    // Import fetch dynamically
     const fetch = (await import('node-fetch')).default;
 
-    // Create release
     const releaseRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases`, {
         method: 'POST',
         headers: {
@@ -73,7 +71,6 @@ async function createGitHubRelease(version) {
     const release = await releaseRes.json();
     console.log(`✓ Created release: ${release.html_url}`);
 
-    // Upload installer
     const installerName = `Glow Setup ${version}.exe`;
     const installerPath = path.join(__dirname, '..', 'dist-installer', installerName);
 
@@ -87,13 +84,7 @@ async function createGitHubRelease(version) {
     const installerData = fs.readFileSync(installerPath);
     console.log(`✓ Read installer file (${(installerData.length / 1024 / 1024).toFixed(2)} MB)`);
 
-    console.log(`Release upload_url: ${release.upload_url}`);
     const uploadUrl = release.upload_url.split('{')[0] + `?name=Glow-${version}.exe`;
-    console.log(`Final upload URL: ${uploadUrl}`);
-
-    // Use Node's https for large file uploads
-    const https = require('https');
-    const urlParse = require('url');
 
     const uploadRes = await fetch(uploadUrl, {
         method: 'POST',
@@ -102,53 +93,20 @@ async function createGitHubRelease(version) {
             'Content-Type': 'application/octet-stream',
             'User-Agent': 'Glow-Release-Script'
         },
-        body: installerData
+        body: Buffer.from(installerData)
     });
 
-    console.log(`Upload response status: ${uploadRes.status}`);
-    if (!uploadRes.ok) {
-        const error = await uploadRes.text();
-        console.error('✗ Failed to upload installer:', error);
-        reject(new Error(`Upload failed: ${uploadRes.status}`));
-    } else {
+    if (uploadRes.status === 201 || uploadRes.status === 200) {
         console.log(`✓ Uploaded installer!`);
         return release.html_url;
+    } else {
+        const error = await uploadRes.text();
+        console.error('✗ Failed to upload installer:', error);
+        console.log(`\nManual upload:`);
+        console.log(`1. Go to: ${release.html_url}`);
+        console.log(`2. Drag and drop: ${installerPath}`);
+        return release.html_url;
     }
-
-    return new Promise((resolve, reject) => {
-        const uploadOptions = urlParse.parse(uploadUrl);
-        uploadOptions.method = 'POST';
-        uploadOptions.headers = {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/octet-stream',
-            'Content-Length': installerData.length,
-            'User-Agent': 'Glow-Release-Script'
-        };
-        uploadOptions.timeout = 60000;
-
-        const uploadReq = https.request(uploadOptions, (res) => {
-            let body = '';
-            res.on('data', chunk => body += chunk);
-            res.on('end', () => {
-                console.log(`Upload response status: ${res.statusCode}`);
-                if (res.statusCode >= 400) {
-                    console.error('✗ Failed to upload installer:', body);
-                    reject(new Error(`Upload failed: ${res.statusCode}`));
-                } else {
-                    console.log(`✓ Uploaded installer!`);
-                    resolve(release.html_url);
-                }
-            });
-        });
-
-        uploadReq.on('error', (err) => {
-            console.error('✗ Upload request error:', err.message);
-            reject(err);
-        });
-
-        uploadReq.write(installerData);
-        uploadReq.end();
-    });
 }
 
 async function main() {
