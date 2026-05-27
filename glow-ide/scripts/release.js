@@ -87,6 +87,11 @@ async function createGitHubRelease(version) {
     const installerData = fs.readFileSync(installerPath);
 
     const uploadUrl = release.upload_url.replace('{?name,label}', `?name=Glow-Setup-${version}.exe`);
+
+    console.log(`\n➤ Uploading ${installerName}...`);
+    console.log(`✓ Read installer file (${installerData.length} bytes)`);
+    console.log(`Uploading to: ${uploadUrl}`);
+
     const uploadRes = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
@@ -96,10 +101,6 @@ async function createGitHubRelease(version) {
         },
         body: installerData
     });
-
-    console.log(`\n➤ Uploading ${installerName}...`);
-    console.log(`✓ Read installer file (${installerData.length} bytes)`);
-    console.log(`Uploading to: ${uploadUrl}`);
 
     console.log(`Upload response status: ${uploadRes.status}`);
     if (!uploadRes.ok) {
