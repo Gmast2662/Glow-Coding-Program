@@ -264,6 +264,7 @@ ipcMain.handle("show-unsaved-dialog", async (_e, fileName) => {
 });
 
 ipcMain.on("confirm-close", () => {
+  s
   clearTimeout(closeTimer);
   if (glowProcess) { glowProcess.kill(); glowProcess = null; }
   isDestroying = true;
@@ -300,8 +301,8 @@ function startGlowProcess(glowJs, filePath) {
   glowProcess = cp.spawn("node", [glowJs, filePath], {
     cwd,
     stdio: ["pipe", "pipe", "pipe"],
-    shell: false,  // ← change from process.platform === "win32" to false
-    detached: false,
+    shell: false,
+    detached: true,  // ← add this
   });
 
   const bindStream = (stream, channel) => {
@@ -354,14 +355,12 @@ ipcMain.on("run-file", (_e, { glowJs, filePath }) => startGlowProcess(glowJs, fi
 
 ipcMain.on("stop-file", () => {
   if (glowProcess) {
-    try {
-      process.kill(-glowProcess.pid);  // kill the whole process group
-    } catch (_) {
-      glowProcess.kill("SIGKILL");
-    }
+    glowProcess.stdin.destroy();
+    process.kill(-glowProcess.pid, "SIGKILL");  // kill entire process group
     glowProcess = null;
   }
 });
+
 ipcMain.on("send-input", (_e, text) => { if (glowProcess?.stdin) glowProcess.stdin.write(text); });
 
 // ─── IPC: Update actions ──────────────────────────────────────────────────────
