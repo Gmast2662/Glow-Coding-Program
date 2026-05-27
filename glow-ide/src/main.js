@@ -141,6 +141,7 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, "renderer", "index.html"));
+  mainWindow.webContents.openDevTools();
   mainWindow.once("ready-to-show", () => mainWindow.show());
 
   mainWindow.on("close", e => {
@@ -390,44 +391,59 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
     const downloadsPath = app.getPath("downloads");
     const installerPath = path.join(downloadsPath, "Glow-Setup.exe");
 
-    console.log(`Downloading update from: ${downloadUrl}`);
+    console.log(`Downloading from: ${downloadUrl}`);
+    console.log(`Saving to: ${installerPath}`);
 
     const file = fs.createWriteStream(installerPath);
 
     https.get(downloadUrl, (response) => {
+      console.log(`Response status: ${response.statusCode}`);
       if (response.statusCode === 302 || response.statusCode === 301) {
-        https.get(response.headers.location, (redirectRes) => {
+        const redirectUrl = response.headers.location;
+        console.log(`Redirecting to: ${redirectUrl}`);
+        https.get(redirectUrl, (redirectRes) => {
           redirectRes.pipe(file);
         });
       } else {
         response.pipe(file);
       }
     }).on('error', (err) => {
+      console.error('Download error:', err.message);
       fs.unlink(installerPath, () => { });
       mainWindow?.webContents.send("run-error", "Download failed: " + err.message);
     });
 
     file.on('finish', () => {
       file.close();
-      console.log(`Downloaded to: ${installerPath}`);
+      console.log(`Download complete, file size: ${fs.statSync(installerPath).size} bytes`);
 
-      // Wait 500ms for file system to finish, then run installer
       setTimeout(() => {
         try {
-          cp.spawn(installerPath, ['/S'], { detached: true });
+          console.log(`Spawning installer: ${installerPath}`);
+          const proc = cp.spawn(installerPath, ['/S'], {
+            detached: true,
+            stdio: 'ignore'
+          });
+          console.log(`Installer spawned, PID: ${proc.pid}`);
 
-          // Close app after installer starts
           setTimeout(() => {
             isDestroying = true;
             mainWindow.destroy();
             app.quit();
-          }, 1000);
+          }, 2000);
         } catch (err) {
+          console.error('Spawn error:', err);
           mainWindow?.webContents.send("run-error", "Failed to run installer: " + err.message);
         }
-      }, 500);
+      }, 1000);
+    });
+
+    file.on('error', (err) => {
+      console.error('File write error:', err);
+      mainWindow?.webContents.send("run-error", "Failed to save installer: " + err.message);
     });
   } catch (err) {
+    console.error('Update error:', err);
     mainWindow?.webContents.send("run-error", "Update failed: " + err.message);
   }
 });
