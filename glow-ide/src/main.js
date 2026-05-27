@@ -416,7 +416,7 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
         try {
           cp.spawn(installerPath, ['/S'], { detached: true });
 
-          // Close app after installer starts
+          // Close app after installer starts 
           setTimeout(() => {
             isDestroying = true;
             mainWindow.destroy();
