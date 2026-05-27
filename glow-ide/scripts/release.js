@@ -85,33 +85,48 @@ async function createGitHubRelease(version) {
 
     console.log(`\n➤ Uploading ${installerName}...`);
     const installerData = fs.readFileSync(installerPath);
+    console.log(`✓ Read installer file (${(installerData.length / 1024 / 1024).toFixed(2)} MB)`);
 
     const uploadUrl = release.upload_url.replace('{?name,label}', `?name=Glow-Setup-${version}.exe`);
+    console.log(`Uploading to: ${uploadUrl.split('?')[0]}...`);
 
-    console.log(`\n➤ Uploading ${installerName}...`);
-    console.log(`✓ Read installer file (${installerData.length} bytes)`);
-    console.log(`Uploading to: ${uploadUrl}`);
+    // Use Node's https for large file uploads
+    const https = require('https');
+    const urlParse = require('url');
 
-    const uploadRes = await fetch(uploadUrl, {
-        method: 'POST',
-        headers: {
+    return new Promise((resolve, reject) => {
+        const uploadOptions = urlParse.parse(uploadUrl);
+        uploadOptions.method = 'POST';
+        uploadOptions.headers = {
             'Authorization': `token ${token}`,
             'Content-Type': 'application/octet-stream',
-            'Content-Length': installerData.length.toString(),
+            'Content-Length': installerData.length,
             'User-Agent': 'Glow-Release-Script'
-        },
-        body: installerData
+        };
+
+        const uploadReq = https.request(uploadOptions, (res) => {
+            let body = '';
+            res.on('data', chunk => body += chunk);
+            res.on('end', () => {
+                console.log(`Upload response status: ${res.statusCode}`);
+                if (res.statusCode >= 400) {
+                    console.error('✗ Failed to upload installer:', body);
+                    reject(new Error(`Upload failed: ${res.statusCode}`));
+                } else {
+                    console.log(`✓ Uploaded installer!`);
+                    resolve(release.html_url);
+                }
+            });
+        });
+
+        uploadReq.on('error', (err) => {
+            console.error('✗ Upload request error:', err.message);
+            reject(err);
+        });
+
+        uploadReq.write(installerData);
+        uploadReq.end();
     });
-
-    console.log(`Upload response status: ${uploadRes.status}`);
-    if (!uploadRes.ok) {
-        const error = await uploadRes.text();
-        console.error('✗ Failed to upload installer:', error);
-        process.exit(1);
-    }
-
-    console.log(`✓ Uploaded installer!`);
-    return release.html_url;
 }
 
 async function main() {
