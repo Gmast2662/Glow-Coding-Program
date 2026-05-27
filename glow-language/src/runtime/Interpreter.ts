@@ -50,6 +50,7 @@ export type ImportResolver = (path: string) => Statement[];
 export class Interpreter {
   private globals = new Environment();
   private importResolver?: ImportResolver;
+  private timedOut = false;
 
   constructor() {
 
@@ -475,7 +476,19 @@ export class Interpreter {
   }
 
   run(statements: Statement[]) {
-    this.executeBlock(statements, this.globals);
+    const MAX_TIME = 5000;
+    this.timedOut = false;
+
+    const timer = setTimeout(() => {
+      this.timedOut = true;
+    }, MAX_TIME);
+
+    try {
+      this.executeBlock(statements, this.globals);
+    } finally {
+      clearTimeout(timer);
+      this.timedOut = false;
+    }
   }
 
   // ─── EXECUTION ────────────────────────────────────────────────────────────
@@ -488,6 +501,12 @@ export class Interpreter {
   }
 
   private execute(statement: Statement, environment: Environment): any {
+    if (this.timedOut) {
+      throw new Error("Execution timeout");
+    }
+
+    const MAX_ITERATIONS = 1000;
+
     switch (statement.type) {
 
       case "ImportStatement": {
@@ -527,7 +546,6 @@ export class Interpreter {
 
       case "WhileStatement":
         let iterations = 0;
-        const MAX_ITERATIONS = 10000; // stops after ~10 seconds at normal speed
         while (this.evaluate(statement.condition, environment)) {
           if (iterations++ > MAX_ITERATIONS) {
             throw new Error("Infinite loop detected — exceeded 10,000 iterations");
@@ -537,14 +555,16 @@ export class Interpreter {
         }
         return;
 
-      case "RepeatStatement": {
-        const count = this.evaluate(statement.count, environment);
-        for (let i = 0; i < count; i++) {
+      case "RepeatStatement":
+        let repIterations = 0;
+        for (let i = 0; i < this.evaluate(statement.count, environment); i++) {
+          if (repIterations++ > MAX_ITERATIONS) {
+            throw new Error("Infinite loop detected");
+          }
           const r = this.executeBlock(statement.body, new Environment(environment));
           if (r instanceof ReturnValue) return r;
         }
         return;
-      }
 
       case "FunctionStatement":
         environment.define(statement.name, {

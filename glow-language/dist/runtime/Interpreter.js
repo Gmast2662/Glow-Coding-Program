@@ -47,6 +47,7 @@ class Environment {
 export class Interpreter {
     globals = new Environment();
     importResolver;
+    timedOut = false;
     constructor() {
         // ─── RANDOM ───────────────────────────────────────────────────────────────
         this.globals.define("random", {
@@ -440,7 +441,18 @@ export class Interpreter {
         this.importResolver = resolver;
     }
     run(statements) {
-        this.executeBlock(statements, this.globals);
+        const MAX_TIME = 5000;
+        this.timedOut = false;
+        const timer = setTimeout(() => {
+            this.timedOut = true;
+        }, MAX_TIME);
+        try {
+            this.executeBlock(statements, this.globals);
+        }
+        finally {
+            clearTimeout(timer);
+            this.timedOut = false;
+        }
     }
     // ─── EXECUTION ────────────────────────────────────────────────────────────
     executeBlock(statements, environment) {
@@ -451,6 +463,10 @@ export class Interpreter {
         }
     }
     execute(statement, environment) {
+        if (this.timedOut) {
+            throw new Error("Execution timeout");
+        }
+        const MAX_ITERATIONS = 1000;
         switch (statement.type) {
             case "ImportStatement": {
                 if (!this.importResolver)
@@ -483,21 +499,27 @@ export class Interpreter {
                 }
                 return;
             case "WhileStatement":
+                let iterations = 0;
                 while (this.evaluate(statement.condition, environment)) {
+                    if (iterations++ > MAX_ITERATIONS) {
+                        throw new Error("Infinite loop detected — exceeded 10,000 iterations");
+                    }
                     const r = this.executeBlock(statement.body, new Environment(environment));
                     if (r instanceof ReturnValue)
                         return r;
                 }
                 return;
-            case "RepeatStatement": {
-                const count = this.evaluate(statement.count, environment);
-                for (let i = 0; i < count; i++) {
+            case "RepeatStatement":
+                let repIterations = 0;
+                for (let i = 0; i < this.evaluate(statement.count, environment); i++) {
+                    if (repIterations++ > MAX_ITERATIONS) {
+                        throw new Error("Infinite loop detected");
+                    }
                     const r = this.executeBlock(statement.body, new Environment(environment));
                     if (r instanceof ReturnValue)
                         return r;
                 }
                 return;
-            }
             case "FunctionStatement":
                 environment.define(statement.name, {
                     type: "Function",
