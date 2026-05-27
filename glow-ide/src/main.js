@@ -370,10 +370,13 @@ ipcMain.on("run-file", (_e, { glowJs, filePath }) => startGlowProcess(glowJs, fi
 
 ipcMain.on("stop-file", () => {
   if (glowProcess) {
-    try {
-      glowProcess.kill("SIGKILL");
-    } catch (_) { }
-    glowProcess = null;
+    glowProcess.stdin.write("\x03");  // Send Ctrl+C signal
+    setTimeout(() => {
+      if (glowProcess && !glowProcess.killed) {
+        glowProcess.kill("SIGKILL");
+      }
+      glowProcess = null;
+    }, 500);
   }
 });
 

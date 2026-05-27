@@ -108,6 +108,14 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
   if (window.glowAPI.onConfigReloaded) {
     window.glowAPI.onConfigReloaded(newConfig => {
+      // Reload preferences
+      window.glowAPI.getPreferences().then(result => {
+        if (result.preferences?.theme) applyTheme(result.preferences.theme);
+        if (result.preferences?.autocomplete !== undefined) state.settings.autocomplete = result.preferences.autocomplete;
+        if (result.preferences?.liveErrors !== undefined) state.settings.diagnostics = result.preferences.liveErrors;
+        if (result.preferences?.autoClosePairs !== undefined) state.settings.autoclose = result.preferences.autoClosePairs;
+      });
+
       if (newConfig?.libraries?.length) Object.assign(LIBRARIES, newConfig.libraries);
       if (newConfig?.examples?.length) Object.assign(EXAMPLES, newConfig.examples);
       if (newConfig?.docs?.length) Object.assign(DOCS_LIST, newConfig.docs);
@@ -187,6 +195,28 @@ function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme || "dark");
 }
 
+function autoFormatCode() {
+  const lines = editor.value.split("\n");
+  let formatted = "";
+  let indent = 0;
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) {
+      formatted += "\n";
+      continue;
+    }
+
+    if (line.startsWith("}") || line.startsWith("else")) indent = Math.max(0, indent - 1);
+    formatted += "    ".repeat(indent) + line + "\n";
+    if (line.endsWith("{")) indent++;
+  }
+
+  editor.value = formatted.trimEnd();
+  setDirty(true);
+  refreshEditorDecorations();
+}
+
 // LIBRARIES / EXAMPLES / DOCS_LIST are the mutable arrays used by render functions.
 // They start as the static values defined below and get overridden by glow-config.js.
 const DOCS_LIST = [];
@@ -225,6 +255,12 @@ editor.addEventListener("keydown", e => {
     return;
   }
 
+  if (ctrlKey && e.key === "t") {
+    e.preventDefault();
+    autoFormatCode();
+    return;
+  }
+
   // Tab → insert 4 spaces
   if (e.key === "Tab") {
     e.preventDefault();
@@ -249,20 +285,37 @@ editor.addEventListener("keydown", e => {
       setDirty(true);
     }
   }
-  // Enter after { → auto-indent
+  // Enter after { → auto-indent and format closing brace
   if (e.key === "Enter") {
     const pos = editor.selectionStart;
     const before = editor.value.substring(0, pos);
+    const after = editor.value.substring(pos);
     const lineStart = before.lastIndexOf("\n") + 1;
     const currentLine = before.substring(lineStart);
     const indent = currentLine.match(/^(\s*)/)[1];
     const lastChar = before.trimEnd().slice(-1);
+
     if (lastChar === "{") {
       e.preventDefault();
       const extra = "    ";
-      const ins = "\n" + indent + extra;
-      editor.value = editor.value.substring(0, pos) + ins + editor.value.substring(editor.selectionEnd);
-      editor.selectionStart = editor.selectionEnd = pos + ins.length;
+      const newIndent = indent + extra;
+      const closingIndent = indent;  // closing brace at same level as opening
+
+      // Check if next line starts with }
+      const nextLineStart = after.indexOf("\n") + 1;
+      const nextLine = after.substring(0, nextLineStart || after.length);
+
+      if (nextLine.trim().startsWith("}")) {
+        // Replace closing brace indent
+        const closingBracePos = after.indexOf("}");
+        const ins = "\n" + newIndent + "\n" + closingIndent;
+        editor.value = before + ins + after.substring(closingBracePos);
+      } else {
+        const ins = "\n" + newIndent;
+        editor.value = before + ins + after;
+      }
+
+      editor.selectionStart = editor.selectionEnd = pos + newIndent.length + 1;
       refreshEditorDecorations();
       setDirty(true);
     }
