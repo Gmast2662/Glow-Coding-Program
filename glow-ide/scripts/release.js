@@ -144,7 +144,7 @@ async function main() {
     console.log('╚════════════════════════════════════════╝');
     console.log(`\n🎉 Version ${version} is live!`);
     console.log(`🔗 ${releaseUrl}\n`);
-    console.log('Users will receive update notifications within 1 hour.\n');
+    console.log('Users will receive update notifications within 5 minutes.\n');
 }
 
 main().catch(err => {
