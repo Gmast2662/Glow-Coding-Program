@@ -417,21 +417,20 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
 
       setTimeout(() => {
         try {
-          app.relaunch();
-
-          // Then run installer and close
+          console.log(`Spawning installer: ${installerPath}`);
           cp.spawn(installerPath, ['/S', '/R'], {
             detached: true,
             stdio: 'ignore'
           });
 
+          // Wait longer for installer to complete before closing
           setTimeout(() => {
             isDestroying = true;
             mainWindow.destroy();
             app.quit();
-          }, 1000);
+          }, 8000);  // ← increased from 2000 to 8000ms
         } catch (err) {
-          console.error('Error:', err);
+          console.error('Spawn error:', err);
         }
       }, 500);
     });
