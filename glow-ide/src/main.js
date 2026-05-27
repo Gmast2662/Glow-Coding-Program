@@ -155,7 +155,6 @@ function createWindow() {
     }, 8000);
   });
 
-  // Schedule update check after window loads
   mainWindow.webContents.once("did-finish-load", () => {
     setTimeout(runUpdateCheck, 3000);
     const { updates } = glowConfig;
