@@ -79,24 +79,30 @@ async function checkForUpdates({ config, mainWindow, configPath }) {
 
   // ── MAJOR: require new installer ──────────────────────────────────────────
   if (latMaj > curMaj) {
+    const exeAsset = releaseData.assets?.find(a => a.name.includes('.exe'));
+    const downloadUrl = exeAsset ? exeAsset.browser_download_url : releaseData.html_url;
+
     mainWindow.webContents.send("update-available", {
       type: "major",
       current: currentVersion,
       latest: latestVersion,
       notes,
-      downloadUrl: releaseData.html_url,
+      downloadUrl: downloadUrl,
     });
     return { status: "major", latestVersion };
   }
 
   // ── MINOR: download new app (notify user) ─────────────────────────────────
   if (latMin > curMin) {
+    const exeAsset = releaseData.assets?.find(a => a.name.includes('.exe'));
+    const downloadUrl = exeAsset ? exeAsset.browser_download_url : releaseData.html_url;
+
     mainWindow.webContents.send("update-available", {
       type: "minor",
       current: currentVersion,
       latest: latestVersion,
       notes,
-      downloadUrl: releaseData.html_url,
+      downloadUrl: downloadUrl,
     });
     return { status: "minor", latestVersion };
   }
@@ -118,7 +124,6 @@ async function checkForUpdates({ config, mainWindow, configPath }) {
     fs.writeFileSync(configPath, newConfigSrc, "utf8");
 
     // Reload config in renderer (send new content)
-    // We re-require by reading the file fresh since require() caches
     const updatedConfig = loadConfigFromFile(configPath);
     mainWindow.webContents.send("config-reloaded", updatedConfig);
     mainWindow.webContents.send("update-available", {
