@@ -255,7 +255,7 @@ editor.addEventListener("keydown", e => {
     return;
   }
 
-  if (ctrlKey && e.key === "t") {
+  if (ctrl && e.key.toLowerCase() === "t") {
     e.preventDefault();
     autoFormatCode();
     return;
@@ -274,6 +274,7 @@ editor.addEventListener("keydown", e => {
   // Auto-close braces
   const pairs = { "{": "}", "[": "]", "(": ")", "\"": "\"", "'": "'" };
   if (state.settings.autoclose && pairs[e.key]) {
+    console.log("Autoclose enabled, inserting pair");
     const start = editor.selectionStart;
     const end = editor.selectionEnd;
     if (start === end) {
@@ -329,6 +330,10 @@ editor.addEventListener("scroll", () => {
   editorHighlight.scrollTop = editor.scrollTop;
   editorHighlight.scrollLeft = editor.scrollLeft;
   hideAutocomplete();
+});
+
+document.getElementById("format-btn").addEventListener("click", () => {
+  autoFormatCode();
 });
 
 // ─── Dirty / Tab Title ────────────────────────────────────────────────────────

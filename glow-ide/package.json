@@ -1,7 +1,7 @@
 {
   "name": "glow-ide",
   "repository": "https://github.com/Gmast2662/Glow-Coding-Program",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "The Glow Language IDE",
   "author": "Avi",
   "main": "src/main.js",
