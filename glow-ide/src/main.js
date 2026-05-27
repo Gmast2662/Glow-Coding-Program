@@ -355,8 +355,9 @@ ipcMain.on("run-file", (_e, { glowJs, filePath }) => startGlowProcess(glowJs, fi
 
 ipcMain.on("stop-file", () => {
   if (glowProcess) {
-    glowProcess.stdin.destroy();
-    process.kill(-glowProcess.pid, "SIGKILL");  // kill entire process group
+    try {
+      glowProcess.kill("SIGKILL");
+    } catch (_) { }
     glowProcess = null;
   }
 });

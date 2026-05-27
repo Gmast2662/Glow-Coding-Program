@@ -129,8 +129,8 @@ export class Interpreter {
     });
 
     // Math constants
-    this.globals.define("PI",       Math.PI);
-    this.globals.define("TAU",      Math.PI * 2);
+    this.globals.define("PI", Math.PI);
+    this.globals.define("TAU", Math.PI * 2);
     this.globals.define("INFINITY", Infinity);
 
     // ─── TYPE CHECKING ────────────────────────────────────────────────────────
@@ -233,7 +233,7 @@ export class Interpreter {
     this.globals.define("readFile", {
       type: "NativeFunction",
       call: (args: any[]) => {
-        
+
         const p = String(args[0]);
         if (!fs.existsSync(p)) throw new GlowRuntimeError(`readFile: file not found: "${p}"`);
         return fs.readFileSync(p, "utf8");
@@ -243,7 +243,7 @@ export class Interpreter {
     this.globals.define("writeFile", {
       type: "NativeFunction",
       call: (args: any[]) => {
-        
+
         fs.writeFileSync(String(args[0]), String(args[1] ?? ""), "utf8");
         return null;
       }
@@ -252,7 +252,7 @@ export class Interpreter {
     this.globals.define("appendFile", {
       type: "NativeFunction",
       call: (args: any[]) => {
-        
+
         fs.appendFileSync(String(args[0]), String(args[1] ?? ""), "utf8");
         return null;
       }
@@ -268,7 +268,7 @@ export class Interpreter {
     this.globals.define("deleteFile", {
       type: "NativeFunction",
       call: (args: any[]) => {
-        
+
         const p = String(args[0]);
         if (fs.existsSync(p)) fs.unlinkSync(p);
         return null;
@@ -371,7 +371,7 @@ export class Interpreter {
         else { start = args[0]; stop = args[1]; step = args[2]; }
         const out: number[] = [];
         if (step > 0) for (let i = start; i < stop; i += step) out.push(i);
-        else          for (let i = start; i > stop; i += step) out.push(i);
+        else for (let i = start; i > stop; i += step) out.push(i);
         return out;
       }
     });
@@ -510,9 +510,9 @@ export class Interpreter {
         return;
 
       case "MemberAssignStatement": {
-        const obj  = this.evaluate(statement.object, environment);
+        const obj = this.evaluate(statement.object, environment);
         const prop = this.evaluate(statement.property, environment);
-        obj[prop]  = this.evaluate(statement.value, environment);
+        obj[prop] = this.evaluate(statement.value, environment);
         return;
       }
 
@@ -526,7 +526,12 @@ export class Interpreter {
         return;
 
       case "WhileStatement":
+        let iterations = 0;
+        const MAX_ITERATIONS = 10000; // stops after ~10 seconds at normal speed
         while (this.evaluate(statement.condition, environment)) {
+          if (iterations++ > MAX_ITERATIONS) {
+            throw new Error("Infinite loop detected — exceeded 10,000 iterations");
+          }
           const r = this.executeBlock(statement.body, new Environment(environment));
           if (r instanceof ReturnValue) return r;
         }
@@ -565,11 +570,11 @@ export class Interpreter {
     if (Array.isArray(object)) {
       switch (method) {
         // existing
-        case "add":       object.push(args[0]); return null;
-        case "remove":    return object.pop();
-        case "length":    return object.length;
-        case "clear":     object.length = 0; return null;
-        case "contains":  return object.includes(args[0]);
+        case "add": object.push(args[0]); return null;
+        case "remove": return object.pop();
+        case "length": return object.length;
+        case "clear": object.length = 0; return null;
+        case "contains": return object.includes(args[0]);
         // new
         case "removeAt": {
           // removeAt(index) — remove item at index, return it
@@ -582,19 +587,19 @@ export class Interpreter {
           object.splice(args[0], 0, args[1]);
           return null;
         }
-        case "get":       return object[args[0]] ?? null;
-        case "set":       object[args[0]] = args[1]; return null;
-        case "first":     return object[0] ?? null;
-        case "last":      return object[object.length - 1] ?? null;
-        case "reverse":   return [...object].reverse();
-        case "sort":      return [...object].sort((a, b) => a - b);
-        case "sortText":  return [...object].sort();
-        case "join":      return object.join(args[0] ?? ", ");
-        case "slice":     return object.slice(args[0], args[1]);
-        case "indexOf":   return object.indexOf(args[0]);
-        case "count":     return object.filter((x: any) => x === args[0]).length;
-        case "isEmpty":   return object.length === 0;
-        case "copy":      return [...object];
+        case "get": return object[args[0]] ?? null;
+        case "set": object[args[0]] = args[1]; return null;
+        case "first": return object[0] ?? null;
+        case "last": return object[object.length - 1] ?? null;
+        case "reverse": return [...object].reverse();
+        case "sort": return [...object].sort((a, b) => a - b);
+        case "sortText": return [...object].sort();
+        case "join": return object.join(args[0] ?? ", ");
+        case "slice": return object.slice(args[0], args[1]);
+        case "indexOf": return object.indexOf(args[0]);
+        case "count": return object.filter((x: any) => x === args[0]).length;
+        case "isEmpty": return object.length === 0;
+        case "copy": return [...object];
         case "each": {
           // each(func) — call func(item) for every element
           for (const item of object) {
@@ -617,26 +622,26 @@ export class Interpreter {
     if (typeof object === "string") {
       switch (method) {
         // existing
-        case "upper":     return object.toUpperCase();
-        case "lower":     return object.toLowerCase();
-        case "split":     return object.split(args[0] ?? "");
+        case "upper": return object.toUpperCase();
+        case "lower": return object.toLowerCase();
+        case "split": return object.split(args[0] ?? "");
         // new
-        case "length":    return object.length;
-        case "trim":      return object.trim();
+        case "length": return object.length;
+        case "trim": return object.trim();
         case "trimStart": return object.trimStart();
-        case "trimEnd":   return object.trimEnd();
+        case "trimEnd": return object.trimEnd();
         case "startsWith": return object.startsWith(args[0]);
-        case "endsWith":  return object.endsWith(args[0]);
-        case "contains":  return object.includes(args[0]);
-        case "replace":   return object.replaceAll(args[0], args[1]);
-        case "slice":     return object.slice(args[0], args[1]);
-        case "indexOf":   return object.indexOf(args[0]);
-        case "repeat":    return object.repeat(args[0]);
-        case "isEmpty":   return object.trim().length === 0;
-        case "charAt":    return object[args[0]] ?? "";
-        case "reverse":   return object.split("").reverse().join("");
-        case "toNumber":  return Number(object);
-        case "toArray":   return object.split("");
+        case "endsWith": return object.endsWith(args[0]);
+        case "contains": return object.includes(args[0]);
+        case "replace": return object.replaceAll(args[0], args[1]);
+        case "slice": return object.slice(args[0], args[1]);
+        case "indexOf": return object.indexOf(args[0]);
+        case "repeat": return object.repeat(args[0]);
+        case "isEmpty": return object.trim().length === 0;
+        case "charAt": return object[args[0]] ?? "";
+        case "reverse": return object.split("").reverse().join("");
+        case "toNumber": return Number(object);
+        case "toArray": return object.split("");
       }
     }
 
@@ -644,12 +649,12 @@ export class Interpreter {
     if (typeof object === "object" && object !== null && !Array.isArray(object)) {
       switch (method) {
         // existing
-        case "keys":    return Object.keys(object);
-        case "values":  return Object.values(object);
-        case "has":     return args[0] in object;
+        case "keys": return Object.keys(object);
+        case "values": return Object.values(object);
+        case "has": return args[0] in object;
         // new
-        case "get":     return object[args[0]] ?? null;
-        case "set":     object[args[0]] = args[1]; return null;
+        case "get": return object[args[0]] ?? null;
+        case "set": object[args[0]] = args[1]; return null;
         case "remove": {
           // remove(key) — delete a key from the table
           const key = args[0];
@@ -658,9 +663,9 @@ export class Interpreter {
           delete object[key];
           return val;
         }
-        case "length":  return Object.keys(object).length;
+        case "length": return Object.keys(object).length;
         case "isEmpty": return Object.keys(object).length === 0;
-        case "copy":    return { ...object };
+        case "copy": return { ...object };
         case "merge": {
           // merge(otherTable) — copy all keys from otherTable into this one
           const other = args[0];
@@ -701,8 +706,8 @@ export class Interpreter {
   private evaluate(expression: Expression, environment: Environment): any {
     switch (expression.type) {
 
-      case "NumberLiteral":  return expression.value;
-      case "StringLiteral":  return expression.value;
+      case "NumberLiteral": return expression.value;
+      case "StringLiteral": return expression.value;
       case "BooleanLiteral": return expression.value;
 
       case "ArrayLiteral":
@@ -733,7 +738,7 @@ export class Interpreter {
         };
 
       case "MemberExpression": {
-        const obj  = this.evaluate(expression.object, environment);
+        const obj = this.evaluate(expression.object, environment);
         const prop = this.evaluate(expression.property, environment);
         return obj[prop];
       }
@@ -743,27 +748,27 @@ export class Interpreter {
         switch (expression.operator) {
           case "!": return !r;
           case "-": return -r;
-          default:  throw new Error(`Unknown unary operator ${expression.operator}`);
+          default: throw new Error(`Unknown unary operator ${expression.operator}`);
         }
       }
 
       case "BinaryExpression": {
-        const left  = this.evaluate(expression.left, environment);
+        const left = this.evaluate(expression.left, environment);
         const right = this.evaluate(expression.right, environment);
         switch (expression.operator) {
-          case "+":   return left + right;
-          case "-":   return left - right;
-          case "*":   return left * right;
-          case "/":   return left / right;
-          case ">":   return left > right;
-          case "<":   return left < right;
-          case ">=":  return left >= right;
-          case "<=":  return left <= right;
-          case "==":  return left === right;
-          case "!=":  return left !== right;
+          case "+": return left + right;
+          case "-": return left - right;
+          case "*": return left * right;
+          case "/": return left / right;
+          case ">": return left > right;
+          case "<": return left < right;
+          case ">=": return left >= right;
+          case "<=": return left <= right;
+          case "==": return left === right;
+          case "!=": return left !== right;
           case "and": return left && right;
-          case "or":  return left || right;
-          default:    throw new Error(`Unknown operator ${expression.operator}`);
+          case "or": return left || right;
+          default: throw new Error(`Unknown operator ${expression.operator}`);
         }
       }
 
@@ -781,7 +786,7 @@ export class Interpreter {
 
         // NORMAL CALL
         const callee = this.evaluate(expression.callee, environment);
-        const args   = expression.args.map(a => this.evaluate(a, environment));
+        const args = expression.args.map(a => this.evaluate(a, environment));
 
         if (callee.type !== "Function" && callee.type !== "NativeFunction") {
           throw new Error("Can only call functions");
