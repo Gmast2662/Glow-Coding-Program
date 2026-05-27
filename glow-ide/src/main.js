@@ -424,7 +424,6 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
             stdio: 'ignore'
           });
 
-          // Close app and let installer handle restart
           setTimeout(() => {
             isDestroying = true;
             mainWindow.destroy();
