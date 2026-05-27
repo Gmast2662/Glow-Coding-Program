@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';" />
+    content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';" />
   <title>Glow IDE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
   <!-- ── TOP BAR ─────────────────────────────────────────────────────────── -->
@@ -146,14 +150,8 @@
         <div id="line-numbers" aria-hidden="true"></div>
         <div id="editor-scroll">
           <pre id="editor-highlight" aria-hidden="true"></pre>
-          <textarea
-            id="editor"
-            spellcheck="false"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            placeholder="// Start writing Glow code here…"
-          ></textarea>
+          <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+            placeholder="// Start writing Glow code here…"></textarea>
           <div id="autocomplete-box" class="hidden" role="listbox"></div>
           <div id="diagnostics-panel" class="hidden"></div>
         </div>
@@ -223,7 +221,9 @@
         <button class="modal-close" data-close="modal-submit">x</button>
       </div>
       <div class="modal-body">
-        <p class="modal-hint">Fill in the details below. Your library file should be in your project's <code>libs/</code> folder.</p>
+        <p class="modal-hint">Fill in the details below. Your library file should be in your project's
+          <code>libs/</code> folder.
+        </p>
         <label>Library Name<input type="text" id="submit-name" placeholder="e.g. myutils" /></label>
         <label>Display Name<input type="text" id="submit-display" placeholder="e.g. My Utilities" /></label>
         <label>Description<textarea id="submit-desc" placeholder="What does this library do?"></textarea></label>
@@ -317,6 +317,12 @@
     </div>
   </div>
 
+  <div id="version-display"
+    style="position: fixed; bottom: 10px; right: 10px; font-size: 11px; color: var(--text-2); pointer-events: none;">
+    v<span id="version-text">1.0.0</span>
+  </div>
+
   <script src="app.js"></script>
 </body>
+
 </html>

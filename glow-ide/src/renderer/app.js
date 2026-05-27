@@ -68,6 +68,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       window._glowAppInfo = info;  // store globally for About modal etc.
       state.glowJs = info.interpreterPath;
 
+      const versionEl = document.getElementById("version-text");
+      if (versionEl && info.version) {
+        versionEl.textContent = info.version;
+      }
+
       // Override static LIBRARIES/EXAMPLES/DOCS with config values if present
       if (info.config?.libraries?.length) Object.assign(LIBRARIES, info.config.libraries);
       if (info.config?.examples?.length) Object.assign(EXAMPLES, info.config.examples);

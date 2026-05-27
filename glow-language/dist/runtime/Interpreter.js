@@ -466,7 +466,7 @@ export class Interpreter {
         if (this.timedOut) {
             throw new Error("Execution timeout");
         }
-        const MAX_ITERATIONS = 10000;
+        const MAX_ITERATIONS = 5000;
         switch (statement.type) {
             case "ImportStatement": {
                 if (!this.importResolver)
@@ -502,7 +502,7 @@ export class Interpreter {
                 let iterations = 0;
                 while (this.evaluate(statement.condition, environment)) {
                     if (iterations++ > MAX_ITERATIONS) {
-                        throw new Error("Infinite loop detected — exceeded 10,000 iterations");
+                        throw new Error("Infinite loop detected — exceeded 5,000 iterations");
                     }
                     const r = this.executeBlock(statement.body, new Environment(environment));
                     if (r instanceof ReturnValue)
