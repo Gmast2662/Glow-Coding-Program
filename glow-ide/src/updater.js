@@ -16,9 +16,9 @@
  *   3. Everyone's IDE picks it up automatically on next launch or hourly check
  */
 
-const https  = require("https");
-const fs     = require("fs");
-const path   = require("path");
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
 const semver = require("./semver-mini");
 
 const RELEASES_URL = (owner, repo) =>
@@ -53,7 +53,7 @@ function get(url) {
 async function checkForUpdates({ config, mainWindow, configPath }) {
   const { updates, version: currentVersion } = config;
   if (!updates?.enabled || !updates.owner || !updates.repo ||
-      updates.owner === "YOUR_GITHUB_USERNAME") {
+    updates.owner === "YOUR_GITHUB_USERNAME") {
     return { status: "disabled" };
   }
 
@@ -65,9 +65,9 @@ async function checkForUpdates({ config, mainWindow, configPath }) {
     return { status: "error", message: e.message };
   }
 
-  const latestTag     = releaseData.tag_name || "";
+  const latestTag = releaseData.tag_name || "";
   const latestVersion = latestTag.replace(/^v/, "");
-  const notes         = releaseData.body || "";
+  const notes = releaseData.body || "";
 
   if (!latestVersion) return { status: "no-version" };
 
@@ -80,9 +80,9 @@ async function checkForUpdates({ config, mainWindow, configPath }) {
   // ── MAJOR: require new installer ──────────────────────────────────────────
   if (latMaj > curMaj) {
     mainWindow.webContents.send("update-available", {
-      type:    "major",
+      type: "major",
       current: currentVersion,
-      latest:  latestVersion,
+      latest: latestVersion,
       notes,
       downloadUrl: releaseData.html_url,
     });
@@ -92,9 +92,9 @@ async function checkForUpdates({ config, mainWindow, configPath }) {
   // ── MINOR: download new app (notify user) ─────────────────────────────────
   if (latMin > curMin) {
     mainWindow.webContents.send("update-available", {
-      type:    "minor",
+      type: "minor",
       current: currentVersion,
-      latest:  latestVersion,
+      latest: latestVersion,
       notes,
       downloadUrl: releaseData.html_url,
     });
@@ -122,9 +122,9 @@ async function checkForUpdates({ config, mainWindow, configPath }) {
     const updatedConfig = loadConfigFromFile(configPath);
     mainWindow.webContents.send("config-reloaded", updatedConfig);
     mainWindow.webContents.send("update-available", {
-      type:    "patch",
+      type: "patch",
       current: currentVersion,
-      latest:  latestVersion,
+      latest: latestVersion,
       notes,
     });
 

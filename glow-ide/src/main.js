@@ -1,14 +1,14 @@
 "use strict";
 
 const { app, BrowserWindow, Menu, dialog, ipcMain, shell, Notification } = require("electron");
-const path   = require("path");
-const os     = require("os");
-const fs     = require("fs");
-const cp     = require("child_process");
+const path = require("path");
+const os = require("os");
+const fs = require("fs");
+const cp = require("child_process");
 
 // ─── Load central config ──────────────────────────────────────────────────────
 const configPath = path.join(__dirname, "..", "glow-config.js");
-let glowConfig   = safeLoadConfig(configPath);
+let glowConfig = safeLoadConfig(configPath);
 
 function safeLoadConfig(p) {
   try {
@@ -24,13 +24,13 @@ function safeLoadConfig(p) {
 const { checkForUpdates } = require("./updater");
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let mainWindow    = null;
-let glowProcess   = null;
-let isDestroying  = false;
-let closeTimer    = null;
-let prefs         = null;
-let prefsPath     = null;
-let sketchbookPath= null;
+let mainWindow = null;
+let glowProcess = null;
+let isDestroying = false;
+let closeTimer = null;
+let prefs = null;
+let prefsPath = null;
+let sketchbookPath = null;
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 function getGlowRoot() {
@@ -58,13 +58,13 @@ function getDefaultSketchbookPath() {
 // ─── Preferences ─────────────────────────────────────────────────────────────
 function defaultPrefs() {
   return {
-    version:       1,
-    glowVersion:   glowConfig.version,
+    version: 1,
+    glowVersion: glowConfig.version,
     sketchbookPath: getDefaultSketchbookPath(),
-    recentFiles:   [],
-    theme:         "dark",
-    autocomplete:  true,
-    liveErrors:    true,
+    recentFiles: [],
+    theme: "dark",
+    autocomplete: true,
+    liveErrors: true,
     autoClosePairs: true,
   };
 }
@@ -74,8 +74,8 @@ function loadPreferences() {
   ensureDir(root);
   prefsPath = path.join(root, "glow-preferences.json");
   try {
-    const raw  = JSON.parse(fs.readFileSync(prefsPath, "utf8"));
-    prefs      = { ...defaultPrefs(), ...raw };
+    const raw = JSON.parse(fs.readFileSync(prefsPath, "utf8"));
+    prefs = { ...defaultPrefs(), ...raw };
   } catch (_) {
     prefs = defaultPrefs();
   }
@@ -86,20 +86,20 @@ function loadPreferences() {
 
 function savePreferences() {
   if (!prefsPath || !prefs) return;
-  try { fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2), "utf8"); } catch (_) {}
+  try { fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2), "utf8"); } catch (_) { }
 }
 
 function addRecent(filePath) {
   if (!filePath || !prefs) return;
   const norm = path.resolve(filePath);
-  prefs.recentFiles = [norm, ...(prefs.recentFiles||[]).filter(p=>path.resolve(p)!==norm)].slice(0,10);
+  prefs.recentFiles = [norm, ...(prefs.recentFiles || []).filter(p => path.resolve(p) !== norm)].slice(0, 10);
   savePreferences();
 }
 
 // ─── Sketch helpers ───────────────────────────────────────────────────────────
 function toSketchName(name) {
-  const base = path.basename(name||"untitled", path.extname(name||""));
-  return (base||"untitled").replace(/[<>:"/\\|?*\x00-\x1F]/g,"_").trim()||"untitled";
+  const base = path.basename(name || "untitled", path.extname(name || ""));
+  return (base || "untitled").replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").trim() || "untitled";
 }
 function isInSketchbook(fp) {
   if (!fp || !sketchbookPath) return false;
@@ -108,8 +108,8 @@ function isInSketchbook(fp) {
 }
 function resolvedSavePath(filePath) {
   if (filePath && path.isAbsolute(filePath)) return filePath;
-  const name   = toSketchName(filePath || "untitled");
-  const dir    = ensureDir(path.join(sketchbookPath, name));
+  const name = toSketchName(filePath || "untitled");
+  const dir = ensureDir(path.join(sketchbookPath, name));
   return path.join(dir, `${name}.glow`);
 }
 
@@ -118,10 +118,10 @@ function findInterpreterSync() {
   const root = getGlowRoot();
   const candidates = [
     path.join(root, "glow-language-new", "dist", "glow.js"),
-    path.join(root, "glow-language",     "dist", "glow.js"),
+    path.join(root, "glow-language", "dist", "glow.js"),
     path.join(root, "resources", "glow", "dist", "glow.js"),   // packaged
     path.join(__dirname, "..", "..", "glow-language-new", "dist", "glow.js"),
-    path.join(__dirname, "..", "..", "glow-language",     "dist", "glow.js"),
+    path.join(__dirname, "..", "..", "glow-language", "dist", "glow.js"),
   ];
   return candidates.find(c => fs.existsSync(c)) || null;
 }
@@ -174,15 +174,15 @@ async function runUpdateCheck() {
 
 // ─── IPC: App info ────────────────────────────────────────────────────────────
 ipcMain.handle("get-app-info", () => ({
-  version:       glowConfig.version,
+  version: glowConfig.version,
   interpreterPath: findInterpreterSync(),
   sketchbookPath,
   prefsPath,
   config: {
-    about:     glowConfig.about,
+    about: glowConfig.about,
     libraries: glowConfig.libraries,
-    examples:  glowConfig.examples,
-    docs:      glowConfig.docs,
+    examples: glowConfig.examples,
+    docs: glowConfig.docs,
   },
   prefs,
 }));
@@ -196,7 +196,7 @@ ipcMain.handle("save-preferences", (_e, updates) => {
 });
 
 ipcMain.handle("get-recent-files", () => {
-  const files = (prefs?.recentFiles||[]).filter(p => fs.existsSync(p));
+  const files = (prefs?.recentFiles || []).filter(p => fs.existsSync(p));
   if (prefs) { prefs.recentFiles = files; savePreferences(); }
   return { ok: true, recentFiles: files };
 });
@@ -221,7 +221,7 @@ ipcMain.handle("file-open", async () => {
   if (res.canceled || !res.filePaths.length) return { canceled: true };
   try {
     const filePath = res.filePaths[0];
-    const content  = fs.readFileSync(filePath, "utf8");
+    const content = fs.readFileSync(filePath, "utf8");
     addRecent(filePath);
     return { ok: true, filePath, content };
   } catch (e) { return { error: e.message }; }
@@ -240,7 +240,7 @@ ipcMain.handle("file-save", async (_e, { filePath, content }) => {
 ipcMain.handle("file-save-as", async (_e, { content, defaultName }) => {
   const res = await dialog.showSaveDialog(mainWindow, {
     title: "Save Glow Sketch",
-    defaultPath: path.join(sketchbookPath, (toSketchName(defaultName||"untitled")) + ".glow"),
+    defaultPath: path.join(sketchbookPath, (toSketchName(defaultName || "untitled")) + ".glow"),
     filters: [{ name: "Glow Files", extensions: ["glow"] }, { name: "All Files", extensions: ["*"] }],
   });
   if (res.canceled) return { canceled: true };
@@ -272,6 +272,15 @@ ipcMain.on("confirm-close", () => {
 
 ipcMain.on("cancel-close", () => clearTimeout(closeTimer));
 
+
+ipcMain.on("config-reloaded", (_e, newConfig) => {
+  if (newConfig && newConfig.version) {
+    glowConfig = newConfig;
+    // Broadcast to renderer so UI updates
+    mainWindow.webContents.send("app-config-updated", glowConfig);
+  }
+});
+
 // ─── IPC: Find interpreter ────────────────────────────────────────────────────
 ipcMain.handle("find-interpreter", () => {
   const p = findInterpreterSync();
@@ -289,7 +298,7 @@ function startGlowProcess(glowJs, filePath) {
 
   const cwd = path.dirname(filePath);
   glowProcess = cp.spawn("node", [glowJs, filePath], {
-    cwd, stdio: ["pipe","pipe","pipe"],
+    cwd, stdio: ["pipe", "pipe", "pipe"],
     shell: process.platform === "win32",
   });
 
@@ -327,10 +336,10 @@ function startGlowProcess(glowJs, filePath) {
 // Run from source (writes to temp file — no save needed)
 ipcMain.on("run-source", (_e, { glowJs, source, fileName }) => {
   try {
-    const tempDir  = ensureDir(path.join(os.tmpdir(), "glow-ide"));
-    const safeName = (fileName||"untitled.glow").replace(/[^a-z0-9_.-]/gi,"_");
+    const tempDir = ensureDir(path.join(os.tmpdir(), "glow-ide"));
+    const safeName = (fileName || "untitled.glow").replace(/[^a-z0-9_.-]/gi, "_");
     const tempFile = path.join(tempDir, Date.now() + "-" + safeName);
-    fs.writeFileSync(tempFile, source||"", "utf8");
+    fs.writeFileSync(tempFile, source || "", "utf8");
     startGlowProcess(glowJs, tempFile);
   } catch (e) {
     mainWindow?.webContents.send("run-error", "Failed to prepare run: " + e.message);

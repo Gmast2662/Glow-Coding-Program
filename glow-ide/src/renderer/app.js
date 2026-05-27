@@ -7,13 +7,13 @@
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const state = {
-  filePath:    null,     // current file path (null = untitled)
-  fileName:    "untitled.glow",
-  isDirty:     false,    // unsaved changes?
-  isRunning:   false,    // glow process active?
-  glowJs:      null,     // path to dist/glow.js
-  childProc:   null,     // running child process
-  waitingInput:false,    // process waiting for input()?
+  filePath: null,     // current file path (null = untitled)
+  fileName: "untitled.glow",
+  isDirty: false,    // unsaved changes?
+  isRunning: false,    // glow process active?
+  glowJs: null,     // path to dist/glow.js
+  childProc: null,     // running child process
+  waitingInput: false,    // process waiting for input()?
   diagnostics: [],
   completionIndex: 0,
   completions: [],
@@ -28,21 +28,21 @@ const state = {
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
-const editor        = $("editor");
+const editor = $("editor");
 const editorHighlight = $("editor-highlight");
 const autocompleteBox = $("autocomplete-box");
 const diagnosticsPanel = $("diagnostics-panel");
-const lineNumbers   = $("line-numbers");
-const editorScroll  = $("editor-scroll");
+const lineNumbers = $("line-numbers");
+const editorScroll = $("editor-scroll");
 const consoleOutput = $("console-output");
-const consoleInput  = $("console-input");
+const consoleInput = $("console-input");
 const consoleInputRow = $("console-input-row");
-const fileTabName   = $("file-tab-name");
-const fileTabDirty  = $("file-tab-dirty");
+const fileTabName = $("file-tab-name");
+const fileTabDirty = $("file-tab-dirty");
 const consoleStatus = $("console-status");
-const btnRun        = $("btn-run");
-const btnStop       = $("btn-stop");
-const modalOverlay  = $("modal-overlay");
+const btnRun = $("btn-run");
+const btnStop = $("btn-stop");
+const modalOverlay = $("modal-overlay");
 
 const KEYWORDS = new Set(["var", "func", "return", "if", "else", "while", "repeat", "for", "in", "import", "true", "false", "and", "or", "not", "exit"]);
 const BUILTINS = [
@@ -70,14 +70,14 @@ window.addEventListener("DOMContentLoaded", async () => {
 
       // Override static LIBRARIES/EXAMPLES/DOCS with config values if present
       if (info.config?.libraries?.length) Object.assign(LIBRARIES, info.config.libraries);
-      if (info.config?.examples?.length)  Object.assign(EXAMPLES,  info.config.examples);
-      if (info.config?.docs?.length)      Object.assign(DOCS_LIST,  info.config.docs);
+      if (info.config?.examples?.length) Object.assign(EXAMPLES, info.config.examples);
+      if (info.config?.docs?.length) Object.assign(DOCS_LIST, info.config.docs);
 
       // Load preferences from main
-      if (info.prefs?.theme)         applyTheme(info.prefs.theme);
-      if (info.prefs?.autocomplete !== undefined)  state.settings.autocomplete  = info.prefs.autocomplete;
-      if (info.prefs?.liveErrors    !== undefined)  state.settings.diagnostics   = info.prefs.liveErrors;
-      if (info.prefs?.autoClosePairs !== undefined) state.settings.autoclose     = info.prefs.autoClosePairs;
+      if (info.prefs?.theme) applyTheme(info.prefs.theme);
+      if (info.prefs?.autocomplete !== undefined) state.settings.autocomplete = info.prefs.autocomplete;
+      if (info.prefs?.liveErrors !== undefined) state.settings.diagnostics = info.prefs.liveErrors;
+      if (info.prefs?.autoClosePairs !== undefined) state.settings.autoclose = info.prefs.autoClosePairs;
     }
   } catch (e) { /* non-fatal */ }
 
@@ -104,8 +104,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (window.glowAPI.onConfigReloaded) {
     window.glowAPI.onConfigReloaded(newConfig => {
       if (newConfig?.libraries?.length) Object.assign(LIBRARIES, newConfig.libraries);
-      if (newConfig?.examples?.length)  Object.assign(EXAMPLES,  newConfig.examples);
-      if (newConfig?.docs?.length)      Object.assign(DOCS_LIST,  newConfig.docs);
+      if (newConfig?.examples?.length) Object.assign(EXAMPLES, newConfig.examples);
+      if (newConfig?.docs?.length) Object.assign(DOCS_LIST, newConfig.docs);
       renderLibraryList();
       renderExamplesList();
       conLine("✦ Content updated automatically.", "con-success");
@@ -224,7 +224,7 @@ editor.addEventListener("keydown", e => {
   if (e.key === "Tab") {
     e.preventDefault();
     const start = editor.selectionStart;
-    const end   = editor.selectionEnd;
+    const end = editor.selectionEnd;
     editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
     editor.selectionStart = editor.selectionEnd = start + 4;
     refreshEditorDecorations();
@@ -234,7 +234,7 @@ editor.addEventListener("keydown", e => {
   const pairs = { "{": "}", "[": "]", "(": ")", "\"": "\"", "'": "'" };
   if (state.settings.autoclose && pairs[e.key]) {
     const start = editor.selectionStart;
-    const end   = editor.selectionEnd;
+    const end = editor.selectionEnd;
     if (start === end) {
       e.preventDefault();
       const close = pairs[e.key];
@@ -246,7 +246,7 @@ editor.addEventListener("keydown", e => {
   }
   // Enter after { → auto-indent
   if (e.key === "Enter") {
-    const pos   = editor.selectionStart;
+    const pos = editor.selectionStart;
     const before = editor.value.substring(0, pos);
     const lineStart = before.lastIndexOf("\n") + 1;
     const currentLine = before.substring(lineStart);
@@ -264,9 +264,9 @@ editor.addEventListener("keydown", e => {
   }
 });
 
-editor.addEventListener("keyup",   () => { updateLineNumbers(); });
-editor.addEventListener("click",    () => { updateLineNumbers(); hideAutocomplete(); });
-editor.addEventListener("scroll",   () => {
+editor.addEventListener("keyup", () => { updateLineNumbers(); });
+editor.addEventListener("click", () => { updateLineNumbers(); hideAutocomplete(); });
+editor.addEventListener("scroll", () => {
   lineNumbers.scrollTop = editor.scrollTop;
   editorHighlight.scrollTop = editor.scrollTop;
   editorHighlight.scrollLeft = editor.scrollLeft;
@@ -567,7 +567,7 @@ async function fileSave() {
   if (!state.filePath) return fileSaveAs();
   const result = await window.glowAPI.fileSave({
     filePath: state.filePath,
-    content:  editor.value,
+    content: editor.value,
   });
   if (result.ok) {
     state.filePath = result.filePath;
@@ -782,8 +782,8 @@ if (window.glowAPI.onRunInput) {
 
 // ─── Resize Handle ────────────────────────────────────────────────────────────
 const resizeHandle = $("resize-handle");
-const consolePane  = $("console-pane");
-const editorPane   = $("editor-pane");
+const consolePane = $("console-pane");
+const editorPane = $("editor-pane");
 let isResizing = false;
 
 resizeHandle.addEventListener("mousedown", e => {
@@ -840,45 +840,45 @@ document.querySelectorAll(".dd-item[data-action]").forEach(btn => {
 });
 
 // Topbar run/stop buttons
-btnRun.addEventListener("click",  runSketch);
+btnRun.addEventListener("click", runSketch);
 btnStop.addEventListener("click", stopSketch);
 
 // ─── Action Dispatcher ────────────────────────────────────────────────────────
 function handleAction(action) {
   switch (action) {
     // File
-    case "new":         fileNew();         break;
-    case "open":        fileOpen();        break;
-    case "save":        fileSave();        break;
-    case "save-as":     fileSaveAs();      break;
-    case "close-file":  fileClose();       break;
+    case "new": fileNew(); break;
+    case "open": fileOpen(); break;
+    case "save": fileSave(); break;
+    case "save-as": fileSaveAs(); break;
+    case "close-file": fileClose(); break;
     // Sketch
-    case "run":         runSketch();       break;
-    case "stop":        stopSketch();      break;
-    case "clear-console": clearConsole();  break;
+    case "run": runSketch(); break;
+    case "stop": stopSketch(); break;
+    case "clear-console": clearConsole(); break;
     // Settings
-    case "settings":     openModal("modal-settings"); break;
+    case "settings": openModal("modal-settings"); break;
     // Library
-    case "lib-browse":  openModal("modal-library"); break;
-    case "lib-new":     newLibraryFile();  break;
-    case "lib-submit":  openModal("modal-submit"); break;
+    case "lib-browse": openModal("modal-library"); break;
+    case "lib-new": newLibraryFile(); break;
+    case "lib-submit": openModal("modal-submit"); break;
     // Help
-    case "help-docs":   openModal("modal-docs");  break;
+    case "help-docs": openModal("modal-docs"); break;
     case "help-examples": openModal("modal-examples"); break;
     case "help-about": {
-    // Populate About from loaded config
-    const nameEl    = document.querySelector(".about-name");
-    const verEl     = document.querySelector(".about-version");
-    const descEl    = document.querySelector(".about-desc");
-    if (nameEl && window._glowAppInfo?.config?.about?.name)
-      nameEl.textContent = window._glowAppInfo.config.about.name + " Language";
-    if (verEl && window._glowAppInfo?.version)
-      verEl.textContent = "IDE v" + window._glowAppInfo.version;
-    if (descEl && window._glowAppInfo?.config?.about?.description)
-      descEl.textContent = window._glowAppInfo.config.about.description;
-    openModal("modal-about");
-    break;
-  }
+      // Populate About from loaded config
+      const nameEl = document.querySelector(".about-name");
+      const verEl = document.querySelector(".about-version");
+      const descEl = document.querySelector(".about-desc");
+      if (nameEl && window._glowAppInfo?.config?.about?.name)
+        nameEl.textContent = window._glowAppInfo.config.about.name + " Language";
+      if (verEl && window._glowAppInfo?.version)
+        verEl.textContent = "IDE v" + window._glowAppInfo.version;
+      if (descEl && window._glowAppInfo?.config?.about?.description)
+        descEl.textContent = window._glowAppInfo.config.about.description;
+      openModal("modal-about");
+      break;
+    }
   }
 }
 
@@ -888,9 +888,9 @@ document.addEventListener("keydown", e => {
   if (ctrl && e.key === "n") { e.preventDefault(); fileNew(); }
   if (ctrl && e.key === "o") { e.preventDefault(); fileOpen(); }
   if (ctrl && e.key === "s" && !e.shiftKey) { e.preventDefault(); fileSave(); }
-  if (ctrl && e.key === "S")  { e.preventDefault(); fileSaveAs(); }
-  if (e.key === "F5")  { e.preventDefault(); runSketch(); }
-  if (e.key === "F6")  { e.preventDefault(); stopSketch(); }
+  if (ctrl && e.key === "S") { e.preventDefault(); fileSaveAs(); }
+  if (e.key === "F5") { e.preventDefault(); runSketch(); }
+  if (e.key === "F6") { e.preventDefault(); stopSketch(); }
   if (e.key === "Escape") {
     if (!modalOverlay.classList.contains("hidden")) closeAllModals();
     else closeAllMenus();
@@ -924,7 +924,7 @@ function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem("glow-ide-settings") || "{}");
     state.settings = { ...state.settings, ...saved };
-  } catch (_) {}
+  } catch (_) { }
   applySettings();
 }
 
@@ -933,11 +933,11 @@ function saveSettings() {
   // Also persist to glow-preferences.json via main process
   if (window.glowAPI?.savePreferences) {
     window.glowAPI.savePreferences({
-      theme:          state.settings.theme,
-      autocomplete:   state.settings.autocomplete,
-      liveErrors:     state.settings.diagnostics,
+      theme: state.settings.theme,
+      autocomplete: state.settings.autocomplete,
+      liveErrors: state.settings.diagnostics,
       autoClosePairs: state.settings.autoclose,
-    }).catch(() => {}); // non-fatal
+    }).catch(() => { }); // non-fatal
   }
 }
 
@@ -1007,7 +1007,7 @@ const LIBRARIES = [
 ];
 
 function renderLibraryList() {
-  const builtin   = $("lib-list-builtin");
+  const builtin = $("lib-list-builtin");
   const community = $("lib-list-community");
   builtin.innerHTML = "";
   community.innerHTML = "";
@@ -1042,7 +1042,7 @@ function selectLibrary(id) {
 
   $("lib-detail-insert").onclick = () => {
     const line = `import "${lib.name}"\n`;
-    const pos  = editor.selectionStart;
+    const pos = editor.selectionStart;
     editor.value = line + editor.value;
     editor.selectionStart = editor.selectionEnd = pos + line.length;
     setDirty(true);
@@ -1429,3 +1429,12 @@ function loadExample(ex) {
     editor.focus();
   });
 }
+
+ipcRenderer.on("app-config-updated", (event, newConfig) => {
+  if (newConfig?.libraries?.length) Object.assign(LIBRARIES, newConfig.libraries);
+  if (newConfig?.examples?.length) Object.assign(EXAMPLES, newConfig.examples);
+  if (newConfig?.docs?.length) Object.assign(DOCS_LIST, newConfig.docs);
+  renderLibraryList();
+  renderExamplesList();
+  conLine("✦ Content updated automatically.", "con-success");
+});

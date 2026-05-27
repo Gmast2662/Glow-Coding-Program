@@ -21,7 +21,7 @@ module.exports = {
   // MAJOR = breaking change / full reinstall needed
   // MINOR = new features, no reinstall (app notifies user to update)
   // PATCH = content-only change (libraries, examples, docs) — auto-applied silently
-  version: "1.0.1",
+  version: "1.0.2",
 
   // ─── Update Server ─────────────────────────────────────────────────────────
   // Point this at your GitHub repo. The updater checks:
@@ -38,9 +38,9 @@ module.exports = {
   about: {
     name: "Glow",
     tagline: "A simple, readable programming language.",
-    description: "Glow is designed for clarity and creativity. Write code that is simple and like plain English.",
-    website: "",   // optional — shown as a link in About
-    github: "",   // optional
+    description: "Glow combines Processing-like simplicity with JavaScript syntax. Learn to code fast without the complexity — no async, no classes, just clear, readable code. Build libraries as easily as you learn the language.",
+    website: "",
+    github: "",
   },
 
   // ─── Built-in Libraries ────────────────────────────────────────────────────
