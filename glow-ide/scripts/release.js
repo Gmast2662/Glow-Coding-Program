@@ -88,7 +88,6 @@ async function createGitHubRelease(version) {
     console.log(`✓ Read installer file (${(installerData.length / 1024 / 1024).toFixed(2)} MB)`);
 
     const uploadUrl = release.upload_url.split('{')[0] + `?name=Glow-${version}.exe`;
-    console.log(`Final upload URL: ${uploadUrl}`)
     console.log(`Uploading to: ${uploadUrl.split('?')[0]}...`);
 
     // Use Node's https for large file uploads
@@ -104,6 +103,7 @@ async function createGitHubRelease(version) {
             'Content-Length': installerData.length,
             'User-Agent': 'Glow-Release-Script'
         };
+        uploadOptions.timeout = 60000;
 
         const uploadReq = https.request(uploadOptions, (res) => {
             let body = '';
