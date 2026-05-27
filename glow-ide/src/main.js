@@ -289,7 +289,7 @@ ipcMain.handle("find-interpreter", () => {
 
 // ─── IPC: Run / Stop ──────────────────────────────────────────────────────────
 function sendStreamLine(channel, text) {
-  if (!mainWindow || !text) return;
+  if (!mainWindow || mainWindow.isDestroyed() || !text) return;
   mainWindow.webContents.send(channel, text.replace(/\r$/, ""));
 }
 
@@ -298,8 +298,10 @@ function startGlowProcess(glowJs, filePath) {
 
   const cwd = path.dirname(filePath);
   glowProcess = cp.spawn("node", [glowJs, filePath], {
-    cwd, stdio: ["pipe", "pipe", "pipe"],
-    shell: process.platform === "win32",
+    cwd,
+    stdio: ["pipe", "pipe", "pipe"],
+    shell: false,  // ← change from process.platform === "win32" to false
+    detached: false,
   });
 
   const bindStream = (stream, channel) => {
