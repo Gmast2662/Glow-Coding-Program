@@ -264,7 +264,6 @@ ipcMain.handle("show-unsaved-dialog", async (_e, fileName) => {
 });
 
 ipcMain.on("confirm-close", () => {
-  s
   clearTimeout(closeTimer);
   if (glowProcess) { glowProcess.kill(); glowProcess = null; }
   isDestroying = true;
@@ -305,20 +304,36 @@ function startGlowProcess(glowJs, filePath) {
     detached: true,  // ← add this
   });
 
+  function cleanErrorMessage(line) {
+    // Remove temp folder path and timestamp: "/path/to/1779850019705-untitled.glow:" → "untitled.glow:"
+    line = line.replace(/.*[/\\](\d+-)?(.+?\.glow)/, "$2");
+    return line;
+  }
+
   const bindStream = (stream, channel) => {
     let buf = "";
     stream.on("data", chunk => {
       buf += chunk.toString();
       const lines = buf.split("\n");
       buf = lines.pop();
-      for (const line of lines) sendStreamLine(channel, line);
+      for (const line of lines) {
+        const cleaned = cleanErrorMessage(line);
+        sendStreamLine(channel, cleaned);
+      }
       // Flush if looks like an input prompt (ends with punctuation+space)
       if (buf && /[:?>\]]\s*$/.test(buf)) {
-        sendStreamLine(channel, buf); buf = "";
+        const cleaned = cleanErrorMessage(buf);
+        sendStreamLine(channel, cleaned);
+        buf = "";
         mainWindow?.webContents.send("run-input");
       }
     });
-    return () => { if (buf) sendStreamLine(channel, buf); buf = ""; };
+    return () => {
+      if (buf) {
+        const cleaned = cleanErrorMessage(buf);
+        sendStreamLine(channel, cleaned);
+      } buf = "";
+    };
   };
 
   const flushOut = bindStream(glowProcess.stdout, "run-output");

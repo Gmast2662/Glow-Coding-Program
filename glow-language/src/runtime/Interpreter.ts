@@ -505,7 +505,7 @@ export class Interpreter {
       throw new Error("Execution timeout");
     }
 
-    const MAX_ITERATIONS = 1000;
+    const MAX_ITERATIONS = 10000;
 
     switch (statement.type) {
 
