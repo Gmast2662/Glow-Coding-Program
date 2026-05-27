@@ -429,7 +429,7 @@ ipcMain.on("download-update", async (_e, downloadUrl) => {
             isDestroying = true;
             mainWindow.destroy();
             app.quit();
-          }, 2000);
+          }, 5000);
         } catch (err) {
           console.error('Spawn error:', err);
           mainWindow?.webContents.send("run-error", "Failed to run installer: " + err.message);
