@@ -55,6 +55,25 @@ function getDefaultSketchbookPath() {
   }
 }
 
+// Load community libraries
+function loadCommunityLibraries() {
+  try {
+    const communityIndexPath = path.join(__dirname, '../../community/community-index.json');
+    if (fs.existsSync(communityIndexPath)) {
+      const communityData = JSON.parse(fs.readFileSync(communityIndexPath, 'utf8'));
+      if (communityData.libraries && communityData.libraries.length) {
+        config.libraries.push(...communityData.libraries);
+      }
+    }
+  } catch (e) {
+    console.log('No community libraries found:', e.message);
+  }
+}
+
+// Then after loading config:
+const config = require('../glow-config.js');
+loadCommunityLibraries();
+
 // ─── Preferences ─────────────────────────────────────────────────────────────
 function defaultPrefs() {
   return {

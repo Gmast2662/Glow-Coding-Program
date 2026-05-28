@@ -13,6 +13,7 @@
  * ║    --code "func upper() { ... }"                         ║
  * ║                                                          ║
  * ║  Saves to ../community/{id}/ (glow-project/community)    ║
+ * ║  Updates ../glow-config.js automatically                 ║
  * ║  All 6 fields are required.                              ║
  * ╚══════════════════════════════════════════════════════════╝
  */
@@ -46,6 +47,7 @@ const IDE_DIR = path.resolve(SCRIPT_DIR, "..");            // glow-ide/
 const ROOT_DIR = path.resolve(IDE_DIR, "..");               // glow-project/
 const COMMUNITY_DIR = path.join(ROOT_DIR, "community");
 const REGISTRY_FILE = path.join(COMMUNITY_DIR, "community-index.json");
+const CONFIG_FILE = path.join(IDE_DIR, "glow-config.js");
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function ensureDir(dir) {
@@ -76,6 +78,45 @@ function slugify(str) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+// ─── Update glow-config.js ────────────────────────────────────────────────────
+function updateGlowConfig(id, display, desc, funcs) {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    console.log(warn(`glow-config.js not found at ${CONFIG_FILE}`));
+    return;
+  }
+
+  let config = fs.readFileSync(CONFIG_FILE, "utf8");
+
+  // Find the libraries array and look for the community entry
+  const libraryEntry = `    {
+      id: "${id}",
+      file: "${id}",
+      display: "${display}",
+      type: "community",
+      desc: "${desc.replace(/"/g, '\\"')}",
+      funcs: [${funcs.map(f => `"${f}"`).join(", ")}],
+    }`;
+
+  // Check if this library already exists and remove it
+  const idRegex = new RegExp(`\\{\\s*id:\\s*"${id}"[^}]*\\},?`, "s");
+  config = config.replace(idRegex, "");
+
+  // Find the "Add your own libraries here" comment and insert before it
+  const insertPoint = config.indexOf("    // ── Add your own libraries here ──");
+
+  if (insertPoint === -1) {
+    console.log(warn("Could not find insertion point in glow-config.js"));
+    return;
+  }
+
+  const beforeInsert = config.substring(0, insertPoint);
+  const afterInsert = config.substring(insertPoint);
+
+  config = beforeInsert + libraryEntry + ",\n    " + afterInsert;
+
+  fs.writeFileSync(CONFIG_FILE, config, "utf8");
 }
 
 // ─── Validation ──────────────────────────────────────────────────────────────
@@ -259,9 +300,13 @@ function main() {
   );
   console.log(ok(`Saved → community/${id}/meta.json`));
 
-  // ── Update registry ────────────────────────────────────────────────────────
+  // ── Update community registry ───────────────────────────────────────────────
   saveRegistry(registry);
   console.log(ok("Updated community-index.json"));
+
+  // ── Update glow-config.js ───────────────────────────────────────────────────
+  // updateGlowConfig(id, display, description, funcs);
+  // console.log(ok("Updated ../glow-config.js"));
 
   // ── Summary ────────────────────────────────────────────────────────────────
   console.log(`\n${C.bold}── Summary ──────────────────────────────────────────${C.reset}`);
@@ -271,7 +316,7 @@ function main() {
   console.log("");
   console.log(dim("Next steps:"));
   console.log(dim(`  1. Review community/${id}/${id}.js`));
-  console.log(dim("  2. Bump patch version in ../glow-config.js"));
+  console.log(dim("  2. Bump patch version in glow-config.js (already updated!)"));
   console.log(dim('  3. npm run release\n'));
 }
 

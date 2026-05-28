@@ -1,0 +1,52 @@
+// ─────────────────────────────────────────────────────────────
+// strings.glow  —  text utilities, validation, and padding
+//
+// Usage:
+//   import "strings"
+//
+//   isEmail("test@glow.org")   // returns true
+//   padLeft("42", 5)           // returns "   42"
+// ─────────────────────────────────────────────────────────────
+
+// ── Pad a string with spaces on the left ────────────────────
+func padLeft(str, targetLen) {
+    var output = toStr(str)
+    while (len(output) < targetLen) {
+        output = " " + output
+    }
+    return output
+}
+
+// ── Pad a string with spaces on the right ───────────────────
+func padRight(str, targetLen) {
+    var output = toStr(str)
+    while (len(output) < targetLen) {
+        output = output + " "
+    }
+    return output
+}
+
+// ── Simple validation to see if a string looks like an email ─
+func isEmail(emailStr) {
+    // Must contain an "@" and a "."
+    if (contains(emailStr, "@") and contains(emailStr, ".")) {
+        return true
+    }
+    return false
+}
+
+// ── Repeat a string N times ─────────────────────────────────
+func repeatStr(text, count) {
+    var result = ""
+    var i = 0
+    while (i < count) {
+        result = result + text
+        i = i + 1
+    }
+    return result
+}
+
+// ── Mask sensitive information (e.g., "password" -> "********") ──
+func mask(text) {
+    return repeatStr("*", len(toStr(text)))
+}

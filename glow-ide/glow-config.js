@@ -21,7 +21,7 @@ module.exports = {
   // MAJOR = breaking change / full reinstall needed
   // MINOR = new features, no reinstall (app notifies user to update)
   // PATCH = content-only change (libraries, examples, docs) — auto-applied silently
-  version: "1.23.0",
+  version: "1.24.0",
 
   // ─── Update Server ─────────────────────────────────────────────────────────
   // Point this at your GitHub repo. The updater checks:
@@ -64,6 +64,23 @@ module.exports = {
       desc: "Extended math library. Note: abs, max, min, clamp, pow, floor, ceil, sqrt, round are already global — no import needed.",
       funcs: ["abs", "max", "min", "clamp", "pow"],
     },
+    {
+      id: "arrays",
+      file: "arrays",
+      display: "Arrays Helper Utils",
+      type: "builtin",
+      desc: "More array utilites - more operations to search, filter, and reverse arrays.",
+      funcs: ["contains", "indexOf", "countOccurrences", "reverseArray", "arrayMax"],
+    },
+    {
+      id: "strings",
+      file: "strings",
+      display: "Strings",
+      type: "builtin",
+      desc: "Text utilities and string formatting library. Adds tools for padding strings, repeating sequences, masking data, and checking structural text layouts like emails.",
+      funcs: ["padLeft", "padRight", "isEmail", "repeatStr", "mask"],
+    },
+
     // ── Add your own libraries here ──────────────────────────────────────────
     // {
     //   id:      "mylib",

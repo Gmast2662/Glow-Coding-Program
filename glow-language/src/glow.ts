@@ -21,7 +21,7 @@ import { Statement } from "./ast/AST.js";
 // When running via node dist/: __dirname === <project>/dist  → go up one
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname  = dirname(__filename);
+const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, "..");
 
 // ─── Load config ─────────────────────────────────────────────────────────────
@@ -37,8 +37,8 @@ if (config.keywords) {
   applyKeywordConfig(config.keywords);
 }
 
-const libsDir  = config.libs?.dir ?? "libs";
-const langExt  = config.language?.extension ?? ".glow";
+const libsDir = config.libs?.dir ?? "libs";
+const langExt = config.language?.extension ?? ".glow";
 const langName = config.language?.name ?? "Glow";
 
 // ─── Parse a .glow file into an AST ──────────────────────────────────────────
@@ -62,7 +62,8 @@ function resolveImport(importPath: string, fromDir: string): string {
 
   const candidates = [
     resolve(fromDir, withExt),
-    resolve(projectRoot, libsDir, withExt)
+    resolve(projectRoot, libsDir, withExt),
+    resolve(projectRoot, "..", "community", importPath, importPath + ".js")
   ];
 
   for (const c of candidates) {
@@ -103,10 +104,10 @@ function parseFileSafe(filePath: string) {
 }
 
 const interpreter = new Interpreter();
-const imported    = new Set<string>();
+const imported = new Set<string>();
 
 interpreter.setImportResolver((importPath: string) => {
-  const fromDir  = dirname(entryFile);
+  const fromDir = dirname(entryFile);
   const resolved = resolve(resolveImport(importPath, fromDir));
   if (imported.has(resolved)) return [];
   imported.add(resolved);

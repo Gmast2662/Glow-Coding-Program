@@ -9,7 +9,7 @@
             "type": "community",
             "version": "1.0.0",
             "author": "Avi",
-            "desc": "You can call the functions with a name (as a string), and it will say something like, Hello, Bob. Very handy for... like 1 things or nothing.",
+            "desc": "You can call the functions with a name (as a string), and it will say something like,  Hello Bob. Very handy for... like 1 things or nothing.",
             "funcs": [
                 "sayHello",
                 "sayBye"

@@ -47,7 +47,8 @@ function resolveImport(importPath, fromDir) {
     const withExt = extname(importPath) ? importPath : importPath + langExt;
     const candidates = [
         resolve(fromDir, withExt),
-        resolve(projectRoot, libsDir, withExt)
+        resolve(projectRoot, libsDir, withExt),
+        resolve(projectRoot, "..", "community", importPath, importPath + ".js")
     ];
     for (const c of candidates) {
         if (existsSync(c))

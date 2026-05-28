@@ -1,0 +1,74 @@
+// ─────────────────────────────────────────────────────────────
+// arrays.glow  —  advanced array manipulation utilities
+//
+// Usage:
+//   import "arrays"
+//
+//   var list = [1, 2, 3, 2, 5]
+//   countOccurrences(list, 2)     // returns 2
+//   reverseArray(list)            // returns [5, 2, 3, 2, 1]
+// ─────────────────────────────────────────────────────────────
+
+// ── Check if an array contains a value ──────────────────────
+func contains(arr, target) {
+    var i = 0
+    while (i < arr.length()) {
+        if (arr[i] == target) {
+            return true
+        }
+        i = i + 1
+    }
+    return false
+}
+
+// ── Find the first index of a value (-1 if not found) ───────
+func indexOf(arr, target) {
+    var i = 0
+    while (i < arr.length()) {
+        if (arr[i] == target) {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+
+// ── Count how many times a value appears ────────────────────
+func countOccurrences(arr, target) {
+    var i = 0
+    var count = 0
+    while (i < arr.length()) {
+        if (arr[i] == target) {
+            count = count + 1
+        }
+        i = i + 1
+    }
+    return count
+}
+
+// ── Reverse an array and return the new list ────────────────
+func reverseArray(arr) {
+    var result = []
+    var i = arr.length() - 1
+    while (i >= 0) {
+        result.add(arr[i])
+        i = i - 1
+    }
+    return result
+}
+
+// ── Find the highest number in an array ─────────────────────
+func arrayMax(arr) {
+    if (arr.length() == 0) {
+        return 0
+    }
+    var i = 1
+    var highest = arr[0]
+    while (i < arr.length()) {
+        if (arr[i] > highest) {
+            highest = arr[i]
+        }
+        i = i + 1
+    }
+    return highest
+}
