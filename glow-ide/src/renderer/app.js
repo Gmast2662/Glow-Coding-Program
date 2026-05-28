@@ -23,7 +23,6 @@ const state = {
     autoclose: true,
     diagnostics: true,
   },
-  libraryTemplate: "",
 };
 
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
@@ -153,7 +152,6 @@ window.addEventListener("DOMContentLoaded", async () => {
       conLine("✦ Content updated automatically.", "con-success");
     });
   }
-
   // Init docs content
   renderDocsSection("basics");
 

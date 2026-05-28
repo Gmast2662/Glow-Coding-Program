@@ -1,5 +1,20 @@
 {
     "version": 1,
-    "updated": "2025-05-27",
-    "libraries": []
+    "updated": "2026-05-28",
+    "libraries": [
+        {
+            "id": "hellobye",
+            "file": "hellobye",
+            "display": "Say Hello and Bye",
+            "type": "community",
+            "version": "1.0.0",
+            "author": "Avi",
+            "desc": "You can call the functions with a name (as a string), and it will say something like, Hello, Bob. Very handy for... like 1 things or nothing.",
+            "funcs": [
+                "sayHello",
+                "sayBye"
+            ],
+            "approved": "2026-05-28"
+        }
+    ]
 }

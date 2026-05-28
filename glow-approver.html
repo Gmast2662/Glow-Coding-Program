@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glow Library Approver</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --success: #10b981;
+      --accent: #f59e0b;
+      --bg-dark: #0f172a;
+      --bg-light: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --text-muted: #cbd5e1;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f36 50%, var(--bg-dark) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background elements */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      left: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 25s ease-in-out infinite reverse;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+      }
+
+      50% {
+        transform: translate(30px, -30px);
+      }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary) 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      animation: slideUp 0.6s ease-out;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .panel-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 250px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      color: var(--text);
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+      transition: all 0.3s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--primary);
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 250px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 250px;
+      overflow: auto;
+      color: var(--success);
+      white-space: normal;
+    }
+
+    .output-content pre {
+      margin: 0;
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .output-content.empty {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .copy-button {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--success);
+      color: var(--success);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .copy-button:hover {
+      background: rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .copy-button.copied {
+      background: var(--success);
+      color: white;
+    }
+
+    .status {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      display: none;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+
+    .status.error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+
+    .preview-section {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .preview-section h3 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+    }
+
+    .field-preview {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+      font-size: 0.9rem;
+    }
+
+    .field-preview:last-child {
+      border-bottom: none;
+    }
+
+    .field-name {
+      color: var(--text-muted);
+    }
+
+    .field-value {
+      color: var(--primary);
+      font-weight: 600;
+      font-family: 'Monaco', 'Menlo', monospace;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 2rem 1rem;
+    }
+
+    .note {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid var(--accent);
+      color: #fbbf24;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>✨ Glow Library Approver</h1>
+      <p class="subtitle">Paste your Formspree submission → Get your command</p>
+    </header>
+
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-title">Paste Formspree Text</div>
+        <textarea id="formspreeInput"
+          placeholder="* author&#10;Bob&#10;* description&#10;...&#10;* display&#10;...&#10;* library_code&#10;func() { }&#10;* name&#10;...&#10;* version&#10;1.0.0"></textarea>
+        <div class="button-group">
+          <button class="btn-primary" onclick="parseFormspree()">Parse & Generate</button>
+          <button class="btn-secondary" onclick="clearAll()">Clear</button>
+        </div>
+        <div id="inputStatus" class="status"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Ready to Run</div>
+        <div id="outputContent" class="output-content empty">
+          <div class="empty-state">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p>Paste Formspree text on the left →</p>
+          </div>
+        </div>
+        <button id="copyButton" class="copy-button" onclick="copyCommand()" style="display: none;">
+          📋 Copy Command
+        </button>
+        <div class="note" id="noteBox" style="display: none;">
+          <strong>📌 For Windows:</strong> Paste into PowerShell, no changes needed!
+        </div>
+      </div>
+    </div>
+
+    <div class="panel preview-section">
+      <h3>📊 Parsed Fields</h3>
+      <div id="previewContent" style="color: var(--text-muted); text-align: center;">
+        Parse some text to see the extracted fields here
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fields = {
+      name: '',
+      display: '',
+      author: '',
+      description: '',
+      version: '',
+      library_code: ''
+    };
+
+    function parseFormspree() {
+      const input = document.getElementById('formspreeInput').value.trim();
+
+      if (!input) {
+        showStatus('Please paste Formspree text', 'error');
+        return;
+      }
+
+      // Reset fields
+      Object.keys(fields).forEach(key => fields[key] = '');
+
+      // Parse the text
+      const lines = input.split('\n');
+      let currentField = null;
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+
+        // Check if this line is a field marker
+        if (trimmed.startsWith('*')) {
+          currentField = trimmed.replace(/^\*\s*/, '').toLowerCase().trim();
+        } else if (trimmed && currentField && fields.hasOwnProperty(currentField)) {
+          // Accumulate value
+          if (fields[currentField]) {
+            fields[currentField] += ' ' + trimmed;
+          } else {
+            fields[currentField] = trimmed;
+          }
+        }
+      }
+
+      // Validate
+      const missing = [];
+      ['name', 'display', 'author', 'description', 'version', 'library_code'].forEach(f => {
+        if (!fields[f]) missing.push(f);
+      });
+
+      if (missing.length > 0) {
+        showStatus(`Missing fields: ${missing.join(', ')}`, 'error');
+        return;
+      }
+
+      generateCommand();
+      showStatus('✅ Parsed successfully!', 'success');
+    }
+
+    function generateCommand() {
+      const { name, display, author, description, version, library_code } = fields;
+
+      // For Windows: use node directly (bypass npm argument issues)
+      // Format: node scripts/approve-library.js --name "value" --display "value" ...
+      const cmdDisplay = `node scripts/approve-library.js --name "${escapeForCmd(name)}" --display "${escapeForCmd(display)}" --author "${escapeForCmd(author)}" --description "${escapeForCmd(description)}" --version "${escapeForCmd(version)}" --code "${escapeForCmd(library_code)}"`;
+
+      // Display command
+      const output = document.getElementById('outputContent');
+      output.innerHTML = `<pre>${escapeHtml(cmdDisplay)}</pre>`;
+      output.classList.remove('empty');
+
+      // Show copy button and note
+      const copyBtn = document.getElementById('copyButton');
+      copyBtn.style.display = 'block';
+      copyBtn.textContent = '📋 Copy Command';
+      copyBtn.classList.remove('copied');
+
+      document.getElementById('noteBox').style.display = 'block';
+
+      // Show preview
+      displayPreview();
+    }
+
+    function displayPreview() {
+      const preview = document.getElementById('previewContent');
+      const html = Object.entries(fields)
+        .map(([key, value]) => `
+          <div class="field-preview">
+            <span class="field-name">${key}</span>
+            <span class="field-value">${escapeHtml(value.substring(0, 40))}${value.length > 40 ? '...' : ''}</span>
+          </div>
+        `)
+        .join('');
+
+      preview.innerHTML = html;
+    }
+
+    function copyCommand() {
+      const { name, display, author, description, version, library_code } = fields;
+      // Copy the exact command for Windows PowerShell/CMD
+      const command = `node scripts/approve-library.js --name "${escapeForCmd(name)}" --display "${escapeForCmd(display)}" --author "${escapeForCmd(author)}" --description "${escapeForCmd(description)}" --version "${escapeForCmd(version)}" --code "${escapeForCmd(library_code)}"`;
+
+      navigator.clipboard.writeText(command).then(() => {
+        const btn = document.getElementById('copyButton');
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy Command';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    function clearAll() {
+      document.getElementById('formspreeInput').value = '';
+      document.getElementById('outputContent').innerHTML = '<div class="empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><p>Paste Formspree text on the left →</p></div>';
+      document.getElementById('outputContent').classList.add('empty');
+      document.getElementById('copyButton').style.display = 'none';
+      document.getElementById('noteBox').style.display = 'none';
+      document.getElementById('inputStatus').classList.remove('show');
+      document.getElementById('previewContent').innerHTML = 'Parse some text to see the extracted fields here';
+      Object.keys(fields).forEach(key => fields[key] = '');
+    }
+
+    function showStatus(message, type) {
+      const status = document.getElementById('inputStatus');
+      status.textContent = message;
+      status.className = `status show ${type}`;
+    }
+
+    // Escape quotes for PowerShell/CMD
+    function escapeForCmd(str) {
+      // For PowerShell: double quotes by doubling them
+      return str.replace(/"/g, '""');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Handle Enter to parse
+    document.getElementById('formspreeInput').addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        parseFormspree();
+      }
+    });
+  </script>
+</body>
+
+</html>

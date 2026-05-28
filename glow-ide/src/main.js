@@ -188,6 +188,7 @@ ipcMain.handle("get-app-info", () => ({
   config: {
     about: glowConfig.about,
     libraries: glowConfig.libraries,
+    library_template: glowConfig.library_template,
     examples: glowConfig.examples,
     docs: glowConfig.docs,
   },
